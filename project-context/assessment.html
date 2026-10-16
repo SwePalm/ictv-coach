@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICTV Coaching Assessment & Loop Diagnostic</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-6">
+  <!-- Data Payload: Coach populates this JSON object with the user's real audit findings -->
+  <script id="ictv-assessment-data" type="application/json">
+  {
+    "userName": "Practitioner",
+    "date": "2026-10-16",
+    "roleSummary": "Knowledge worker delegating research, synthesis, and repeatable deliverables to AI.",
+    "primaryBlockerLetter": "V",
+    "primaryBlockerHeadline": "Verification happens after the draft is written—making your own reading speed the bottleneck.",
+    "strengths": [
+      "Clear intent on what business outcome matters before starting a conversation.",
+      "Separates durable project files from scratch chat conversations."
+    ],
+    "pillars": {
+      "V": {
+        "name": "Verification",
+        "tag": "Primary Blocker",
+        "question": "How do we know it was done well before reading every word?",
+        "observedSignal": "Outputs are reviewed top-to-bottom after generation, without a pre-draft Check Report or explicit 'Not checked' line.",
+        "intervention": "Require a 4-point Check Report + mandatory 'Not checked:' line at the top of every deliverable before reading the prose."
+      },
+      "I": {
+        "name": "Instructions",
+        "tag": "Loop Connected",
+        "question": "How is the work specified, including what is NOT acceptable?",
+        "observedSignal": "Goals are clear, but negative boundaries ('Not acceptable') are often added only after a first draft misses.",
+        "intervention": "Add 3 explicit 'Not acceptable' bullets to repeating task briefs."
+      },
+      "C": {
+        "name": "Context",
+        "tag": "Working Well",
+        "question": "What does the job need to know and how should results arrive?",
+        "observedSignal": "Project context lives in plain Markdown files inside an owned folder.",
+        "intervention": "Apply the 3x Paste Rule whenever background is repeated across threads."
+      },
+      "T": {
+        "name": "Tools",
+        "tag": "Scoped",
+        "question": "What is read-only context plumbing vs. staged action?",
+        "observedSignal": "Read-only tools are connected; external writes remain staged for human sign-off.",
+        "intervention": "Turn repeatable validation checks into a small deterministic script."
+      }
+    },
+    "experimentOptions": [
+      {
+        "id": "exp-v1",
+        "letter": "V",
+        "recommended": true,
+        "title": "Check Report Before Draft (with 'Not Checked' line)",
+        "task": "Next deliverable or client/team summary this week",
+        "whyItWorks": "Forces verification criteria upfront and points your eyes straight to unverified assumptions instead of reading every sentence.",
+        "successMetric": "Catch any missing context or assumption from the Check Report in under 60 seconds."
+      },
+      {
+        "id": "exp-i1",
+        "letter": "I",
+        "recommended": false,
+        "title": "Run a 5-Minute Handover Interview on 1 Repeating Task",
+        "task": "A task you do at least once a week",
+        "whyItWorks": "Moves you from re-prompting in chat to a reusable handover.md with hard negative constraints.",
+        "successMetric": "Save 1 reusable handover file in ictv-coach/handovers/ and run it twice."
+      },
+      {
+        "id": "exp-c1",
+        "letter": "C",
+        "recommended": false,
+        "title": "The 3x Paste Rule Audit",
+        "task": "Extract recurring role, audience, and tone rules into profile.md",
+        "whyItWorks": "Eliminates re-explaining who you are and who you write for at the start of every session.",
+        "successMetric": "Zero manual background copy-pasting across 5 consecutive AI sessions."
+      }
+    ]
+  }
+  </script>
+
+  <div class="max-w-4xl mx-auto space-y-6" id="app"></div>
+
+  <script>
+    // Ensure clean theme variables when opened standalone in a standard browser outside Antigravity
+    (function ensureStandaloneTheme() {
+      const root = document.documentElement;
+      const computed = getComputedStyle(root).getPropertyValue('--card').trim();
+      if (!computed) {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const vars = prefersDark ? {
+          '--background': '#0b0f17',
+          '--card': '#131b2e',
+          '--content': '#182238',
+          '--border': '#26324d',
+          '--foreground': '#f1f5f9',
+          '--muted-foreground': '#94a3b8',
+          '--primary': '#38bdf8',
+          '--primary-foreground': '#090d16',
+          '--secondary': '#1e293b',
+          '--secondary-foreground': '#e2e8f0',
+          '--accent': '#1e293b'
+        } : {
+          '--background': '#f8fafc',
+          '--card': '#ffffff',
+          '--content': '#f1f5f9',
+          '--border': '#e2e8f0',
+          '--foreground': '#0f172a',
+          '--muted-foreground': '#475569',
+          '--primary': '#0284c7',
+          '--primary-foreground': '#ffffff',
+          '--secondary': '#f1f5f9',
+          '--secondary-foreground': '#0f172a',
+          '--accent': '#e2e8f0'
+        };
+        Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+      }
+    })();
+
+    const data = JSON.parse(document.getElementById('ictv-assessment-data').textContent);
+    let selectedPillar = data.primaryBlockerLetter || 'V';
+    let selectedExpId = (data.experimentOptions.find(e => e.recommended) || data.experimentOptions[0]).id;
+    let customTaskNote = '';
+    let copiedState = false;
+
+    function render() {
+      const app = document.getElementById('app');
+      const activePillar = data.pillars[selectedPillar];
+      const selectedExp = data.experimentOptions.find(e => e.id === selectedExpId) || data.experimentOptions[0];
+
+      app.innerHTML = `
+        <!-- Header Card -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
+            <div>
+              <div class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">ICTV Coach · Evidence-Based Assessment</div>
+              <h1 class="text-xl font-bold mt-1 text-[var(--foreground)]">${data.userName} — Working Diagnosis</h1>
+              <p class="text-sm text-[var(--muted-foreground)] mt-0.5">${data.roleSummary}</p>
+            </div>
+            <div class="text-xs px-3 py-1.5 rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+              Assessed: <span class="font-medium">${data.date}</span>
+            </div>
+          </div>
+
+          <!-- Mirror: Strengths & #1 Blocker -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+            <div class="p-4 rounded-lg bg-[var(--secondary)] border border-[var(--border)]">
+              <div class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">What Already Works Well</div>
+              <ul class="mt-2.5 space-y-2 text-sm text-[var(--foreground)]">
+                ${data.strengths.map(s => `<li class="flex items-start gap-2"><span class="text-[var(--primary)] font-bold">✓</span><span>${s}</span></li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="p-4 rounded-lg bg-[var(--secondary)] border-2 border-[var(--primary)]">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">#1 Active Bottleneck · [${data.primaryBlockerLetter}]</span>
+                <span class="text-xs px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold">Start Here</span>
+              </div>
+              <p class="mt-2 text-sm font-medium text-[var(--foreground)]">${data.primaryBlockerHeadline}</p>
+              <p class="mt-2 text-xs text-[var(--muted-foreground)]">Remember: Verification (V) is not the final step of a pipeline—it is the lever that exposes what Instructions (I), Context (C), or Tools (T) need next.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive ICTV Loop Diagnostic -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h2 class="text-base font-semibold text-[var(--foreground)]">Interactive ICTV Loop Diagnostic</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Click any letter in the loop to inspect your audit evidence and how that pillar connects.</p>
+            </div>
+            <span class="text-xs text-[var(--muted-foreground)]">V pulls I, C, and T up ↻</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            ${['V', 'I', 'C', 'T'].map(letter => {
+              const p = data.pillars[letter];
+              const isSelected = selectedPillar === letter;
+              const isPrimary = data.primaryBlockerLetter === letter;
+              return `
+                <button onclick="selectPillar('${letter}')" class="text-left p-3.5 rounded-xl border transition-all ${isSelected ? 'border-2 border-[var(--primary)] bg-[var(--secondary)] shadow-sm' : 'border-[var(--border)] bg-[var(--background)] opacity-85 hover:opacity-100'}">
+                  <div class="flex items-center justify-between">
+                    <span class="text-lg font-bold text-[var(--foreground)]">${letter}</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full ${isPrimary ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold' : 'bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)]'}">${p.tag}</span>
+                  </div>
+                  <div class="text-sm font-medium mt-1 text-[var(--foreground)]">${p.name}</div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Selected Pillar Detail Panel -->
+          <div class="mt-4 p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="text-sm font-semibold text-[var(--foreground)]">
+                [${selectedPillar}] ${activePillar.name} — <span class="font-normal text-[var(--muted-foreground)] italic">"${activePillar.question}"</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+                <div class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Observed in Your Workflow</div>
+                <p class="text-sm mt-1 text-[var(--foreground)]">${activePillar.observedSignal}</p>
+              </div>
+              <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+                <div class="text-xs font-semibold uppercase text-[var(--primary)]">ICTV Loop Practice</div>
+                <p class="text-sm mt-1 text-[var(--foreground)]">${activePillar.intervention}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Choose This Week's Single Practice Experiment -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+          <h2 class="text-base font-semibold text-[var(--foreground)]">Commit to One Practice This Week</h2>
+          <p class="text-xs text-[var(--muted-foreground)] mt-0.5">"Start with less than you think you need." Pick one small intervention to test on a real task this week.</p>
+
+          <div class="space-y-3 mt-4">
+            ${data.experimentOptions.map(exp => {
+              const active = exp.id === selectedExpId;
+              return `
+                <div onclick="selectExperiment('${exp.id}')" class="cursor-pointer p-4 rounded-xl border transition-all ${active ? 'border-2 border-[var(--primary)] bg-[var(--secondary)]' : 'border-[var(--border)] bg-[var(--background)] hover:opacity-95'}">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">[${exp.letter}]</span>
+                      <span class="text-sm font-semibold text-[var(--foreground)]">${exp.title}</span>
+                    </div>
+                    ${exp.recommended ? `<span class="text-xs px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold">Recommended</span>` : ''}
+                  </div>
+                  <p class="text-xs text-[var(--muted-foreground)] mt-1.5">${exp.whyItWorks}</p>
+                  <div class="mt-2 text-xs text-[var(--foreground)]"><span class="font-semibold">How we know it worked:</span> ${exp.successMetric}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4">
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-[var(--muted-foreground)] mb-1">Real task on my desk to test this on (optional customization):</label>
+              <input
+                type="text"
+                value="${customTaskNote || selectedExp.task}"
+                oninput="updateTaskNote(this.value)"
+                class="w-full px-3 py-2 text-sm rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)]"
+              />
+            </div>
+            <button onclick="copyActiveFocusMarkdown()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-semibold hover:opacity-90 transition-opacity shrink-0">
+              ${copiedState ? '✓ Copied active-focus.md!' : 'Copy for active-focus.md'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    window.selectPillar = function(letter) {
+      selectedPillar = letter;
+      render();
+    };
+
+    window.selectExperiment = function(id) {
+      selectedExpId = id;
+      customTaskNote = '';
+      render();
+    };
+
+    window.updateTaskNote = function(val) {
+      customTaskNote = val;
+    };
+
+    window.copyActiveFocusMarkdown = function() {
+      const exp = data.experimentOptions.find(e => e.id === selectedExpId) || data.experimentOptions[0];
+      const taskText = customTaskNote || exp.task;
+      const md = `# Active Coaching Focus\n\n*Updated: ${data.date}*\n\n## Current Blocker\n- **How It Shows Up in My Work:** ${data.primaryBlockerHeadline}\n- **Primary ICTV Pillar Involved:** \`[${exp.letter}]\`\n\n## This Week's Practice Experiment\n- **The One Thing I'm Trying:** ${exp.title}\n- **Real Task to Test It On:** ${taskText}\n- **How We Know It Worked:** ${exp.successMetric}\n`;
+      navigator.clipboard.writeText(md).then(() => {
+        copiedState = true;
+        render();
+        setTimeout(() => { copiedState = false; render(); }, 2500);
+      });
+    };
+
+    render();
+  </script>
+</body>
+</html>

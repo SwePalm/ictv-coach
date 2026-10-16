@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICTV Weekly Reflection & Loop Review</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-6">
+  <!-- Data Payload: Coach populates this JSON object with the week's real misses and focus -->
+  <script id="ictv-weekly-data" type="application/json">
+  {
+    "weekLabel": "2026-W42",
+    "date": "2026-10-16",
+    "committedPractice": "Require a Check Report (with a mandatory 'Not checked:' line) before reading the draft.",
+    "dominantLetter": "C",
+    "misses": [
+      {
+        "date": "2026-10-16",
+        "task": "Initial ICTV Pedagogical Framing",
+        "tags": ["C", "I"],
+        "symptom": "5-stage adoption ladder table felt too complex for some users while beginner workshop exercises felt too basic for experienced users.",
+        "upgrade": "Hid the ladder from the UI (decisions.md D2) and built 3-tier blocker diagnostics so the coach adapts depth automatically."
+      }
+    ],
+    "nextWeekCandidates": [
+      {
+        "id": "next-1",
+        "letter": "V",
+        "title": "Mutation Test One Verification Check",
+        "description": "Inject 1 deliberate flaw (e.g., an unverified citation or banned buzzword) into a sample draft to confirm your Check Report catches it."
+      },
+      {
+        "id": "next-2",
+        "letter": "I",
+        "title": "Convert One Repeating Task into a Handover File",
+        "description": "Run the 5-minute Handover Interview on a task you do weekly and save it to ictv-coach/handovers/."
+      },
+      {
+        "id": "next-3",
+        "letter": "C",
+        "title": "Apply the 3x Paste Rule to One Project Folder",
+        "description": "Move any background or audience rules you typed more than twice this week into a plain Markdown file."
+      }
+    ]
+  }
+  </script>
+
+  <div class="max-w-4xl mx-auto space-y-6" id="app"></div>
+
+  <script>
+    (function ensureStandaloneTheme() {
+      const root = document.documentElement;
+      const computed = getComputedStyle(root).getPropertyValue('--card').trim();
+      if (!computed) {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const vars = prefersDark ? {
+          '--background': '#0b0f17',
+          '--card': '#131b2e',
+          '--content': '#182238',
+          '--border': '#26324d',
+          '--foreground': '#f1f5f9',
+          '--muted-foreground': '#94a3b8',
+          '--primary': '#38bdf8',
+          '--primary-foreground': '#090d16',
+          '--secondary': '#1e293b',
+          '--secondary-foreground': '#e2e8f0',
+          '--accent': '#1e293b'
+        } : {
+          '--background': '#f8fafc',
+          '--card': '#ffffff',
+          '--content': '#f1f5f9',
+          '--border': '#e2e8f0',
+          '--foreground': '#0f172a',
+          '--muted-foreground': '#475569',
+          '--primary': '#0284c7',
+          '--primary-foreground': '#ffffff',
+          '--secondary': '#f1f5f9',
+          '--secondary-foreground': '#0f172a',
+          '--accent': '#e2e8f0'
+        };
+        Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+      }
+    })();
+
+    const data = JSON.parse(document.getElementById('ictv-weekly-data').textContent);
+    let filterLetter = 'ALL';
+    let commitmentStatus = 'kept';
+    let reviewBehavior = 'check-report-first';
+    let missBehavior = 'tagged-and-upgraded';
+    let selectedNextId = data.nextWeekCandidates[0].id;
+    let newMissTask = '';
+    let newMissTag = 'V';
+    let newMissSymptom = '';
+    let newMissUpgrade = '';
+    let copiedReport = false;
+
+    const tagHints = {
+      V: 'Verification miss: Our checks passed even though the output had a flaw. Fix: Add a new tickable check or "Not checked" rule.',
+      I: 'Instruction miss: The objective or "Not acceptable" boundary was vague. Fix: Tighten the handover instruction.',
+      C: 'Context miss: The AI had to guess background facts, audience, or examples. Fix: Move the missing context into a folder file.',
+      T: 'Tool miss: The AI guessed something a tool or script should have fetched or calculated deterministically.'
+    };
+
+    function countByLetter(letter) {
+      return data.misses.filter(m => m.tags.includes(letter)).length;
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      const filteredMisses = filterLetter === 'ALL'
+        ? data.misses
+        : data.misses.filter(m => m.tags.includes(filterLetter));
+
+      app.innerHTML = `
+        <!-- Header -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
+            <div>
+              <div class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">ICTV Coach · Weekly Loop Reflection</div>
+              <h1 class="text-xl font-bold mt-1 text-[var(--foreground)]">Week ${data.weekLabel} Review</h1>
+              <p class="text-sm text-[var(--muted-foreground)] mt-0.5">Committed Practice: <span class="text-[var(--foreground)] font-medium">${data.committedPractice}</span></p>
+            </div>
+            <div class="text-xs px-3 py-1.5 rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
+              ${data.date}
+            </div>
+          </div>
+
+          <!-- 3-Part Interactive Trust Calibration Check -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+            <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)]">
+              <div class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">1. This Week's Practice</div>
+              <div class="mt-2.5 space-y-1.5">
+                ${[
+                  { id: 'kept', label: '✓ Tested & worth keeping' },
+                  { id: 'tweaked', label: '↻ Tried, needs a small tweak' },
+                  { id: 'skipped', label: '○ Didn’t get to test it yet' }
+                ].map(opt => `
+                  <button onclick="setCommitmentStatus('${opt.id}')" class="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${commitmentStatus === opt.id ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)]'}">
+                    ${opt.label}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)]">
+              <div class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">2. How I Verified Outputs</div>
+              <div class="mt-2.5 space-y-1.5">
+                ${[
+                  { id: 'check-report-first', label: '✓ Read Check Report before draft' },
+                  { id: 'read-every-word', label: '⚠ Read every word myself (bottleneck)' },
+                  { id: 'skimmed', label: '⚠ Skimmed fluent text (criteria drift risk)' }
+                ].map(opt => `
+                  <button onclick="setReviewBehavior('${opt.id}')" class="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${reviewBehavior === opt.id ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)]'}">
+                    ${opt.label}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)]">
+              <div class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">3. When an Output Missed</div>
+              <div class="mt-2.5 space-y-1.5">
+                ${[
+                  { id: 'tagged-and-upgraded', label: '✓ Tagged [I/C/T/V] & updated folder' },
+                  { id: 'reprompted-in-chat', label: '↻ Argued with AI across 4+ chat turns' },
+                  { id: 'rewrote-by-hand', label: '⚠ Rewrote the draft manually myself' }
+                ].map(opt => `
+                  <button onclick="setMissBehavior('${opt.id}')" class="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${missBehavior === opt.id ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)]'}">
+                    ${opt.label}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Misses Ledger & Interactive Tagger -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-base font-semibold text-[var(--foreground)]">Misses Tagged This Week (The Loop Engine)</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Every miss tagged to I, C, T, or V upgrades your system so the same failure never repeats.</p>
+            </div>
+            <!-- Letter Filter Pills -->
+            <div class="flex items-center gap-1.5">
+              ${['ALL', 'V', 'I', 'C', 'T'].map(l => `
+                <button onclick="setFilter('${l}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${filterLetter === l ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--secondary)] text-[var(--foreground)] border-[var(--border)]'}">
+                  ${l === 'ALL' ? `All (${data.misses.length})` : `[${l}] (${countByLetter(l)})`}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Logged Misses List -->
+          <div class="space-y-3">
+            ${filteredMisses.length === 0 ? `
+              <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] text-xs text-[var(--muted-foreground)]">
+                No misses logged for [${filterLetter}] yet. Use the quick tagger below to log a moment where AI fell short this week.
+              </div>
+            ` : filteredMisses.map(m => `
+              <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] space-y-1.5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="text-sm font-semibold text-[var(--foreground)]">${m.task}</div>
+                  <div class="flex items-center gap-1.5">
+                    ${m.tags.map(t => `<span class="text-xs font-bold px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)]">[${t}]</span>`).join('')}
+                    <span class="text-xs text-[var(--muted-foreground)]">${m.date}</span>
+                  </div>
+                </div>
+                <p class="text-xs text-[var(--muted-foreground)]"><strong class="text-[var(--foreground)]">What went wrong:</strong> ${m.symptom}</p>
+                <p class="text-xs text-[var(--foreground)]"><strong class="text-[var(--primary)]">System upgrade applied:</strong> ${m.upgrade}</p>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Interactive Quick Miss Tagger -->
+          <div class="p-4 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-3">
+            <div class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">+ Log & Tag Another Miss from This Week</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-xs text-[var(--muted-foreground)] mb-1">Task where AI disappointed or needed fixing:</label>
+                <input type="text" placeholder="e.g., Client proposal summary" value="${newMissTask}" oninput="newMissTask = this.value" class="w-full px-3 py-1.5 text-xs rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]" />
+              </div>
+              <div>
+                <label class="block text-xs text-[var(--muted-foreground)] mb-1">Which letter caused it?</label>
+                <div class="grid grid-cols-4 gap-1">
+                  ${['V', 'I', 'C', 'T'].map(l => `
+                    <button onclick="setNewMissTag('${l}')" class="py-1.5 rounded-lg text-xs font-bold border ${newMissTag === l ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)]'}">[${l}]</button>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+            <div class="text-xs text-[var(--muted-foreground)] italic">${tagHints[newMissTag]}</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input type="text" placeholder="What went wrong? (symptom)" value="${newMissSymptom}" oninput="newMissSymptom = this.value" class="w-full px-3 py-1.5 text-xs rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]" />
+              <div class="flex gap-2">
+                <input type="text" placeholder="What did/will we change in the folder?" value="${newMissUpgrade}" oninput="newMissUpgrade = this.value" class="w-full px-3 py-1.5 text-xs rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]" />
+                <button onclick="addMiss()" class="px-3 py-1.5 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold shrink-0">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Choose Next Week's Single Step -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 class="text-base font-semibold text-[var(--foreground)]">Select Next Week's Single Step</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Keep it small: change one variable at a time and keep earlier checks running.</p>
+            </div>
+            <button onclick="copyWeeklyCheckinMarkdown()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold hover:opacity-90 transition-opacity">
+              ${copiedReport ? '✓ Copied Weekly Check-in Markdown!' : `Copy ${data.weekLabel}.md Summary`}
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+            ${data.nextWeekCandidates.map(c => {
+              const active = c.id === selectedNextId;
+              return `
+                <div onclick="selectNext('${c.id}')" class="cursor-pointer p-4 rounded-xl border transition-all ${active ? 'border-2 border-[var(--primary)] bg-[var(--secondary)]' : 'border-[var(--border)] bg-[var(--background)]'}">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">[${c.letter}]</span>
+                    ${active ? `<span class="text-xs font-semibold text-[var(--primary)]">Selected for Next Week</span>` : ''}
+                  </div>
+                  <div class="text-sm font-semibold mt-2 text-[var(--foreground)]">${c.title}</div>
+                  <p class="text-xs text-[var(--muted-foreground)] mt-1">${c.description}</p>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    window.setFilter = function(l) { filterLetter = l; render(); };
+    window.setCommitmentStatus = function(v) { commitmentStatus = v; render(); };
+    window.setReviewBehavior = function(v) { reviewBehavior = v; render(); };
+    window.setMissBehavior = function(v) { missBehavior = v; render(); };
+    window.setNewMissTag = function(l) { newMissTag = l; render(); };
+    window.selectNext = function(id) { selectedNextId = id; render(); };
+
+    window.addMiss = function() {
+      if (!newMissTask.trim() && !newMissSymptom.trim()) return;
+      data.misses.unshift({
+        date: data.date,
+        task: newMissTask.trim() || 'Untagged Task',
+        tags: [newMissTag],
+        symptom: newMissSymptom.trim() || 'Output required manual rework.',
+        upgrade: newMissUpgrade.trim() || `Added [${newMissTag}] rule to handover/folder.`
+      });
+      newMissTask = '';
+      newMissSymptom = '';
+      newMissUpgrade = '';
+      render();
+    };
+
+    window.copyWeeklyCheckinMarkdown = function() {
+      const nextChoice = data.nextWeekCandidates.find(c => c.id === selectedNextId) || data.nextWeekCandidates[0];
+      const md = `# Weekly ICTV Check-in: ${data.weekLabel}\n\n*Date:* ${data.date}\n\n## 1. Practice Review\n- **Last Week's Focus:** ${data.committedPractice}\n- **Outcome:** ${commitmentStatus}\n\n## 2. Friction & Loop Summary\n- **Misses Logged (${data.misses.length}):**\n${data.misses.map(m => `  - **${m.task}** (${m.tags.map(t => `\`[${t}]\``).join(', ')}): ${m.symptom} → *Upgrade:* ${m.upgrade}`).join('\n')}\n\n## 3. Trust Calibration Snapshot\n- **Verification Habit:** ${reviewBehavior}\n- **Response to Misses:** ${missBehavior}\n\n## 4. Next Week's Single Step\n- **Selected Practice (\`[${nextChoice.letter}]\`):** ${nextChoice.title} — ${nextChoice.description}\n`;
+      navigator.clipboard.writeText(md).then(() => {
+        copiedReport = true;
+        render();
+        setTimeout(() => { copiedReport = false; render(); }, 2500);
+      });
+    };
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# macOS / OS files
+.DS_Store
+
+# Personal coaching session folder at repo root (created when users run ictv-coach locally)
+/ictv-coach/
