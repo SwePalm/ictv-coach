@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICTV Delegation Option Workbench</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-6">
+  <!-- Data Payload: Coach populates this JSON object with domain-informed options, pros/cons, taste samples, and ICTV building blocks -->
+  <script id="ictv-workbench-data" type="application/json">
+  {
+    "taskTitle": "Executive & Board Intelligence Brief",
+    "taskSlug": "board-intelligence-brief",
+    "date": "2026-10-17",
+    "framingSummary": "Instead of starting from a blank page of questions, select one approach—or combine multiple options (such as B + C)—and curate the pre-drafted ICTV rules below.",
+    "options": [
+      {
+        "id": "opt-a",
+        "code": "A",
+        "selected": false,
+        "name": "Option A: The Red-Team Sparring Partner",
+        "summary": "Challenges your existing draft or agenda to expose weak assumptions, missing counter-arguments, and likely board questions.",
+        "pros": [
+          "Zero risk of generic AI-written prose; keeps your voice 100% intact.",
+          "Surfaces blind spots before stakeholders ask hard questions."
+        ],
+        "cons": [
+          "Does not assemble or draft the initial brief for you.",
+          "Requires you to write the first version manually."
+        ],
+        "whereItBreaks": "Turns into polite flattery unless explicitly instructed to find 3 concrete weaknesses."
+      },
+      {
+        "id": "opt-b",
+        "code": "B",
+        "selected": true,
+        "name": "Option B: Source-Locked Decision Brief Builder",
+        "summary": "Synthesizes raw notes, metrics, and department updates from your folder into a structured decision memo with a strict Check Report.",
+        "pros": [
+          "Saves ~70% of assembly time on complex multi-source updates.",
+          "Check Report + Stowaway defense prevents invented facts."
+        ],
+        "cons": [
+          "Requires all raw inputs to be placed in the project folder first."
+        ],
+        "whereItBreaks": "Without negative constraints, it smooths over departmental disagreements into vague corporate optimism."
+      },
+      {
+        "id": "opt-c",
+        "code": "C",
+        "selected": true,
+        "name": "Option C: Standing Weekly Signal & Exception Scanner",
+        "summary": "Runs on a recurring weekly cadence across your folder/feeds, surfacing only material changes, exceptions, and decisions needing an owner.",
+        "pros": [
+          "Compounds in value every week as logged misses tighten the filter.",
+          "Eliminates starting from scratch before every meeting cycle."
+        ],
+        "cons": [
+          "Needs a reject list ('Runners-up / Not selected') so you can verify it didn't hide a key signal."
+        ],
+        "whereItBreaks": "Criteria drift over time if you stop checking the reject list on runs 1–3."
+      }
+    ],
+    "tasteSamples": {
+      "selected": "B",
+      "sampleA": {
+        "label": "Style A: Narrative Executive Summary",
+        "excerpt": "Q3 operations progressed steadily across core markets. While DACH experienced a 14-day component delay, mitigation discussions are underway and overall momentum remains positive.",
+        "derivedRuleI": "Write a cohesive narrative overview suitable for broad stakeholder distribution.",
+        "derivedRuleV": "Verify smooth transitions and balanced coverage across all departments."
+      },
+      "sampleB": {
+        "label": "Style B: Decisions & Exceptions First",
+        "excerpt": "1. DECISION REQUIRED (By Fri): DACH 14-day supplier delay requires sign-off on €40k backup stock (Owner: Operations).\n2. ON TRACK: Nordics & UK within 2% of plan (no action needed).",
+        "derivedRuleI": "Open with decisions and exceptions requiring a named owner; ban smoothing adjectives ('steadily', 'positive momentum').",
+        "derivedRuleV": "Check that every top-level bullet names a decision, a number, or a date."
+      }
+    },
+    "buildingBlocks": [
+      {
+        "id": "bb-1",
+        "fromOptions": ["B", "C"],
+        "letter": "V",
+        "category": "Verification Check",
+        "text": "Print a Check Report at the top (including a 'Not Checked:' line) before outputting the brief.",
+        "state": "keep"
+      },
+      {
+        "id": "bb-2",
+        "fromOptions": ["B"],
+        "letter": "V",
+        "category": "Stowaway Defense",
+        "text": "Every number or claim must cite the exact file in inputs/; mark anything missing as [Unknown — not in source files].",
+        "state": "keep"
+      },
+      {
+        "id": "bb-3",
+        "fromOptions": ["C"],
+        "letter": "V",
+        "category": "Filter Transparency",
+        "text": "Include a short 'Dropped / Runners-Up' list at the bottom so I can see what the weekly scanner filtered out.",
+        "state": "keep"
+      },
+      {
+        "id": "bb-4",
+        "fromOptions": ["B", "A"],
+        "letter": "I",
+        "category": "Not Acceptable",
+        "text": "Do not smooth over tensions or conflicting numbers between source documents—highlight the discrepancy explicitly.",
+        "state": "keep"
+      },
+      {
+        "id": "bb-5",
+        "fromOptions": ["B", "C"],
+        "letter": "C",
+        "category": "Context Plumbing",
+        "text": "Read inputs from inputs/ folder and standing audience rules from ictv-coach/profile.md.",
+        "state": "keep"
+      },
+      {
+        "id": "bb-6",
+        "fromOptions": ["B", "C"],
+        "letter": "T",
+        "category": "The Handbrake",
+        "text": "Stage output to drafts/ only. Stop and ask before proceeding if key source files are missing or >2 assumptions are needed.",
+        "state": "keep"
+      },
+      {
+        "id": "bb-7",
+        "fromOptions": ["A"],
+        "letter": "I",
+        "category": "Red-Team Prompt",
+        "text": "List the 3 hardest questions a skeptical board member will ask after reading this brief.",
+        "state": "optional"
+      }
+    ]
+  }
+  </script>
+
+  <div class="max-w-4xl mx-auto space-y-6" id="app"></div>
+
+  <script>
+    (function ensureStandaloneTheme() {
+      const root = document.documentElement;
+      const computed = getComputedStyle(root).getPropertyValue('--card').trim();
+      if (!computed) {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const vars = prefersDark ? {
+          '--background': '#0b0f17',
+          '--card': '#131b2e',
+          '--content': '#182238',
+          '--border': '#26324d',
+          '--foreground': '#f1f5f9',
+          '--muted-foreground': '#94a3b8',
+          '--primary': '#38bdf8',
+          '--primary-foreground': '#090d16',
+          '--secondary': '#1e293b',
+          '--secondary-foreground': '#e2e8f0',
+          '--accent': '#1e293b'
+        } : {
+          '--background': '#f8fafc',
+          '--card': '#ffffff',
+          '--content': '#f1f5f9',
+          '--border': '#e2e8f0',
+          '--foreground': '#0f172a',
+          '--muted-foreground': '#475569',
+          '--primary': '#0284c7',
+          '--primary-foreground': '#ffffff',
+          '--secondary': '#f1f5f9',
+          '--secondary-foreground': '#0f172a',
+          '--accent': '#e2e8f0'
+        };
+        Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+      }
+    })();
+
+    const data = JSON.parse(document.getElementById('ictv-workbench-data').textContent);
+    let expandedDetails = { 'opt-b': true, 'opt-c': true };
+    let customBoundary = '';
+    let savedBanner = false;
+    let showMarkdownPreview = false;
+
+    function getSelectedCodes() {
+      return data.options.filter(o => o.selected).map(o => o.code);
+    }
+
+    function toggleOption(id) {
+      const opt = data.options.find(o => o.id === id);
+      if (!opt) return;
+      opt.selected = !opt.selected;
+      // Ensure at least one option stays selected
+      if (data.options.every(o => !o.selected)) {
+        opt.selected = true;
+      }
+      render();
+    }
+
+    function toggleDetails(id, event) {
+      if (event) event.stopPropagation();
+      expandedDetails[id] = !expandedDetails[id];
+      render();
+    }
+
+    function cycleBlockState(id) {
+      const b = data.buildingBlocks.find(x => x.id === id);
+      if (!b) return;
+      const order = ['keep', 'optional', 'strike'];
+      b.state = order[(order.indexOf(b.state) + 1) % order.length];
+      render();
+    }
+
+    function addCustomBlock() {
+      if (!customBoundary.trim()) return;
+      data.buildingBlocks.push({
+        id: 'bb-custom-' + Date.now(),
+        fromOptions: getSelectedCodes(),
+        letter: 'I',
+        category: 'Custom Rule',
+        text: customBoundary.trim(),
+        state: 'keep'
+      });
+      customBoundary = '';
+      render();
+    }
+
+    function buildHandoverMarkdown() {
+      const selectedOpts = data.options.filter(o => o.selected);
+      const selectedCodes = selectedOpts.map(o => o.code);
+      const activeSample = data.tasteSamples.selected === 'A' ? data.tasteSamples.sampleA : data.tasteSamples.sampleB;
+      const relevantBlocks = data.buildingBlocks.filter(b =>
+        b.state !== 'strike' && b.fromOptions.some(code => selectedCodes.includes(code))
+      );
+
+      const byLetter = l => relevantBlocks.filter(b => b.letter === l);
+
+      return `# Task Handover: ${data.taskTitle}
+
+*Generated via ICTV Option Workbench on ${data.date}*  
+*Selected Operating Model(s):* ${selectedOpts.map(o => `**${o.name}**`).join(' + ')}
+
+---
+
+## 1. Chosen Operating Approach
+${selectedOpts.map(o => `- **${o.name}:** ${o.summary}`).join('\n')}
+
+## 2. I — Instructions (What Is the Job & Boundaries?)
+- **Output Style Preference:** ${activeSample.label}
+- **Style Rule:** ${activeSample.derivedRuleI}
+${byLetter('I').map(b => `- **[${b.state.toUpperCase()}] ${b.category}:** ${b.text}`).join('\n')}
+
+## 3. C — Context (Inputs & Format)
+${byLetter('C').map(b => `- **[${b.state.toUpperCase()}] ${b.category}:** ${b.text}`).join('\n')}
+
+## 4. T — Tools & Access Boundaries (With Handbrake)
+${byLetter('T').map(b => `- **[${b.state.toUpperCase()}] ${b.category}:** ${b.text}`).join('\n')}
+
+## 5. V — Verification (Check Report Before Result)
+Run these checks and print the **Check Report** at the top of the response before showing the draft:
+- [ ] **Style & Framing Check:** ${activeSample.derivedRuleV}
+${byLetter('V').map(b => `- [ ] **${b.category} (${b.state.toUpperCase()}):** ${b.text}`).join('\n')}
+- [ ] **Mandatory Boundary:** Include \`Bracketed Assumptions: [...]\` and a \`Not checked:\` line.
+`;
+    }
+
+    async function saveHandoverFile() {
+      const md = buildHandoverMarkdown();
+      const filename = `${data.taskSlug}-handover.md`;
+
+      // Try File System Access API first if available in top-level browser
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{ description: 'Markdown File', accept: { 'text/markdown': ['.md'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(md);
+          await writable.close();
+          savedBanner = true;
+          render();
+          return;
+        } catch (err) {
+          // User cancelled or iframe blocked showSaveFilePicker; fall through to <a download>
+        }
+      }
+
+      // Universal fallback: trigger direct file download (<a download>) + open saved preview
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      savedBanner = true;
+      showMarkdownPreview = true;
+      render();
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      const selectedCodes = getSelectedCodes();
+      const visibleBlocks = data.buildingBlocks.filter(b =>
+        b.fromOptions.some(code => selectedCodes.includes(code))
+      );
+
+      app.innerHTML = `
+        <!-- Header -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">ICTV Coach · Delegation Option Workbench</span>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)]">
+              Combined Active Options: <strong>${selectedCodes.join(' + ')}</strong>
+            </span>
+          </div>
+          <h1 class="text-xl font-bold mt-1 text-[var(--foreground)]">${data.taskTitle}</h1>
+          <p class="text-sm text-[var(--muted-foreground)] mt-1">${data.framingSummary}</p>
+        </div>
+
+        <!-- Step 1: Multi-Select Option Cards with Progressive Disclosure -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-base font-semibold text-[var(--foreground)]">Step 1 · Select One or Combine Multiple Approaches (e.g., B + C)</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Click any card to toggle it into your combined workflow. Use "Inspect Trade-offs" for progressive disclosure.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            ${data.options.map(opt => {
+              const isOpen = !!expandedDetails[opt.id];
+              return `
+                <div onclick="toggleOption('${opt.id}')" class="cursor-pointer rounded-xl border p-4 transition-all flex flex-col justify-between ${opt.selected ? 'border-2 border-[var(--primary)] bg-[var(--secondary)] shadow-sm' : 'border-[var(--border)] bg-[var(--background)] opacity-80 hover:opacity-100'}">
+                  <div>
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-xs font-bold px-2.5 py-0.5 rounded ${opt.selected ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' : 'bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)]'}">
+                        ${opt.selected ? `✓ Option ${opt.code} Included` : `+ Include Option ${opt.code}`}
+                      </span>
+                      <button onclick="toggleDetails('${opt.id}', event)" class="text-xs text-[var(--primary)] underline">
+                        ${isOpen ? 'Hide trade-offs' : 'Inspect trade-offs'}
+                      </button>
+                    </div>
+                    <h3 class="text-sm font-bold text-[var(--foreground)] mt-2.5">${opt.name}</h3>
+                    <p class="text-xs text-[var(--muted-foreground)] mt-1">${opt.summary}</p>
+                  </div>
+
+                  ${isOpen ? `
+                    <div class="mt-3 pt-3 border-t border-[var(--border)] space-y-2 text-xs" onclick="event.stopPropagation()">
+                      <div>
+                        <div class="font-semibold text-[var(--primary)]">+ Pros:</div>
+                        <ul class="list-disc pl-4 text-[var(--foreground)] space-y-0.5 mt-0.5">
+                          ${opt.pros.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                      </div>
+                      <div>
+                        <div class="font-semibold text-[var(--muted-foreground)]">− Cons:</div>
+                        <ul class="list-disc pl-4 text-[var(--muted-foreground)] space-y-0.5 mt-0.5">
+                          ${opt.cons.map(c => `<li>${c}</li>`).join('')}
+                        </ul>
+                      </div>
+                      <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">
+                        <span class="font-semibold text-[var(--primary)]">Where it breaks:</span> ${opt.whereItBreaks}
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Step 2: A vs B Taste Calibrator -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-3">
+          <div>
+            <h2 class="text-base font-semibold text-[var(--foreground)]">Step 2 · Calibrate "What Good Looks Like" (React, Don't Describe)</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Pick the micro-sample that matches how you want results to read. Your choice automatically writes the Instruction (I) and Verification (V) rule.</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            ${['A', 'B'].map(code => {
+              const s = code === 'A' ? data.tasteSamples.sampleA : data.tasteSamples.sampleB;
+              const active = data.tasteSamples.selected === code;
+              return `
+                <div onclick="data.tasteSamples.selected='${code}'; render();" class="cursor-pointer p-4 rounded-xl border transition-all ${active ? 'border-2 border-[var(--primary)] bg-[var(--secondary)]' : 'border-[var(--border)] bg-[var(--background)]'}">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-[var(--foreground)]">${s.label}</span>
+                    ${active ? `<span class="text-xs px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold">Selected Style</span>` : ''}
+                  </div>
+                  <p class="text-xs text-[var(--muted-foreground)] font-mono mt-2 whitespace-pre-line p-2.5 rounded bg-[var(--card)] border border-[var(--border)]">${s.excerpt}</p>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="p-3 rounded-lg bg-[var(--secondary)] border border-[var(--border)] text-xs space-y-1">
+            <div><strong class="text-[var(--primary)]">Auto-Derived [I] Rule:</strong> ${(data.tasteSamples.selected === 'A' ? data.tasteSamples.sampleA : data.tasteSamples.sampleB).derivedRuleI}</div>
+            <div><strong class="text-[var(--primary)]">Auto-Derived [V] Check:</strong> ${(data.tasteSamples.selected === 'A' ? data.tasteSamples.sampleA : data.tasteSamples.sampleB).derivedRuleV}</div>
+          </div>
+        </div>
+
+        <!-- Step 3: Curate Merged ICTV Building Blocks -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-base font-semibold text-[var(--foreground)]">Step 3 · Curate the Merged ICTV Rules for Option(s) ${selectedCodes.join(' + ')}</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Click any rule to cycle between <strong>KEEP</strong>, <strong>OPTIONAL</strong>, or <strong>STRIKE</strong>.</p>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            ${visibleBlocks.map(b => {
+              const badge = b.state === 'keep'
+                ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
+                : b.state === 'optional'
+                  ? 'bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)]'
+                  : 'bg-[var(--background)] text-[var(--muted-foreground)] line-through';
+              return `
+                <div onclick="cycleBlockState('${b.id}')" class="cursor-pointer p-3 rounded-xl bg-[var(--secondary)] border border-[var(--border)] flex items-center justify-between gap-3 hover:border-[var(--primary)] transition-all">
+                  <div class="space-y-0.5">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">[${b.letter}] ${b.category}</span>
+                      <span class="text-xs text-[var(--muted-foreground)]">From Option ${b.fromOptions.join(' + ')}</span>
+                    </div>
+                    <p class="text-xs mt-1 ${b.state === 'strike' ? 'line-through text-[var(--muted-foreground)]' : 'text-[var(--foreground)]'}">${b.text}</p>
+                  </div>
+                  <span class="text-xs font-semibold px-3 py-1 rounded-lg uppercase shrink-0 ${badge}">${b.state}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Add 1 Custom Rule -->
+          <div class="flex gap-2 pt-2">
+            <input
+              type="text"
+              placeholder="Have an opinion to add? Type a custom boundary or check here..."
+              value="${customBoundary}"
+              oninput="customBoundary = this.value"
+              class="flex-1 px-3 py-2 text-xs rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)]"
+            />
+            <button onclick="addCustomBlock()" class="px-3.5 py-2 rounded-lg bg-[var(--secondary)] border border-[var(--border)] text-xs font-semibold text-[var(--foreground)] hover:border-[var(--primary)] shrink-0">
+              + Add Rule
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Save to File (No Broken Copy Buttons) -->
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 class="text-base font-semibold text-[var(--foreground)]">Step 4 · Save Choices to File for the Next Step</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Saves <code>${data.taskSlug}-handover.md</code> to your folder so your agent reads your exact choices on the next turn.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="showMarkdownPreview = !showMarkdownPreview; render();" class="px-3 py-2 rounded-lg bg-[var(--secondary)] border border-[var(--border)] text-xs font-semibold text-[var(--foreground)]">
+                ${showMarkdownPreview ? 'Hide File Preview' : 'Preview File'}
+              </button>
+              <button onclick="saveHandoverFile()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold hover:opacity-90 transition-opacity">
+                Save ${data.taskSlug}-handover.md
+              </button>
+            </div>
+          </div>
+
+          ${savedBanner ? `
+            <div class="p-3 rounded-lg bg-[var(--secondary)] border border-[var(--primary)] text-xs text-[var(--foreground)]">
+              ✓ Saved <strong>${data.taskSlug}-handover.md</strong>! Place it in <code>ictv-coach/handovers/</code> (or tell your agent in chat: <em>"Run the handover we just configured"</em>).
+            </div>
+          ` : ''}
+
+          ${showMarkdownPreview ? `
+            <pre class="p-4 rounded-xl bg-[var(--background)] border border-[var(--border)] text-xs font-mono text-[var(--foreground)] overflow-x-auto whitespace-pre-wrap">${buildHandoverMarkdown()}</pre>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    render();
+  </script>
+</body>
+</html>

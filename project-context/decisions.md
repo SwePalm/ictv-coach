@@ -30,3 +30,10 @@
 * **Decision:** Generate self-contained, interactive HTML pages (`assessment.html` and `check-ins/YYYY-WXX.html`) stored in the same folder right alongside the plain Markdown files (`profile.md`, `active-focus.md`, `misses-ledger.md`, `check-ins/YYYY-WXX.md`).
 * **Rationale:** Plain Markdown is the ideal durable context format for agents to read and write, while interactive HTML provides a rich Generative UI layer for humans to explore the ICTV loop, toggle the "Check Report vs. Raw Draft" comparison, tag misses interactively, and export updated Markdown commitments.
 
+## D6 — Propose Multi-Selectable Options & Trade-Offs Instead of Interrogating; Save Choices to Files
+* **Subject:** `option-curation-over-interrogation`
+* **Status:** Accepted (2026-10-17)
+* **Decision:** Replace the blank-slate Q&A "Handover Interview" in Workflow 2 with an interactive **Delegation Option Workbench** (`option-workbench-ui-template.html`). The AI proposes 2–4 concrete approaches with Pros, Cons, and failure modes; the user can select one OR combine multiple options (e.g., Option B + Option C), react to an A/B Taste Calibrator, and toggle pre-drafted `I`, `C`, `T`, and `V` rules (`[KEEP] / [OPTIONAL] / [STRIKE]`). Remove all clipboard copy buttons in favor of direct file saving (`Save <filename>.md`) so the next step reads the saved file directly.
+* **Rationale:** When humans explore something new, they have the least information about what options exist, but the highest capacity for judgment once options and trade-offs are shown (*recognition over recall*). Furthermore, sandboxed UI iframes block clipboard API calls, whereas saving directly to a `.md` file reinforces the owned-context-folder habit and feeds the next step cleanly.
+
+

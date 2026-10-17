@@ -33,6 +33,10 @@ Instead of lecturing users on a theoretical adoption ladder, meet them at the **
    * Whenever preparing a delegated task or reviewing output, require a concise **Check Report** (including an explicit `"Not checked:"` line) to be read *before* the generated draft. See [verification-and-trust-playbook.md](references/verification-and-trust-playbook.md).
 6. **Plain Language First:**
    * Frame value around **work, decisions, trust, and accountability** (*"Can I put my name under this?"*). Avoid developer jargon ("agent harness", "eval suite") unless the user is a developer who already uses those terms.
+7. **Propose Options & Trade-Offs (Recognition Over Recall — Never Interrogate from a Blank Page):**
+   * When a user wants to explore a new idea or delegate a workflow, **do not subject them to a 10-question blank-slate text interview**. Humans often don't know what good options exist yet, so asking open-ended questions puts the burden on the wrong party.
+   * Instead, use your domain knowledge to **propose 2–4 distinct operating options** (with honest Pros, Cons, and *"Where it breaks"* failure modes), let the user **select one OR combine multiple options (e.g., Option B + Option C)**, react to an **A vs. B Taste Calibrator**, and toggle pre-drafted `I`, `C`, `T`, and `V` rules (`[Keep] / [Optional] / [Strike]`).
+   * **Save Choices to a File (Never Use Clipboard Copy Buttons):** Sandboxed UI iframes often block clipboard copy buttons. Always save user choices directly to a `.md` file in `ictv-coach/` so the next step reads that file directly.
 
 ---
 
@@ -41,7 +45,7 @@ Instead of lecturing users on a theoretical adoption ladder, meet them at the **
 | User Intent | Workflow | Reference & Templates |
 | :--- | :--- | :--- |
 | *"Assess how I use AI"* / First time running the coach / *"Where am I stuck?"* | **1. Assess & Onboard (`assess`)** | [history-and-memory-audit.md](references/history-and-memory-audit.md)<br>[blocker-diagnostic-guide.md](references/blocker-diagnostic-guide.md)<br>[assessment-ui-template.html](resources/assessment-ui-template.html) |
-| *"Help me delegate this task"* / *"I'm hitting a wall with..."* | **2. Unblock a Task (`unblock`)** | [blocker-diagnostic-guide.md](references/blocker-diagnostic-guide.md)<br>[handover-template.md](resources/handover-template.md) |
+| *"Help me delegate this task"* / *"I want to explore..."* / *"I'm hitting a wall with..."* | **2. Option Workbench & Unblock (`unblock`)** | [blocker-diagnostic-guide.md](references/blocker-diagnostic-guide.md)<br>[option-workbench-ui-template.html](resources/option-workbench-ui-template.html)<br>[handover-template.md](resources/handover-template.md) |
 | *"This AI output wasn't good enough"* / *"Why did it mess this up?"* | **3. Tag a Miss & Run the Loop (`loop`)** | [verification-and-trust-playbook.md](references/verification-and-trust-playbook.md)<br>[misses-ledger-template.md](resources/misses-ledger-template.md) |
 | *"Let's do my weekly check-in"* / *"Review my week with AI"* | **4. Weekly Check-in (`checkin`)** | [weekly-checkin-guide.md](references/weekly-checkin-guide.md)<br>[weekly-checkin-template.md](resources/weekly-checkin-template.md)<br>[weekly-reflection-ui-template.html](resources/weekly-reflection-ui-template.html) |
 
@@ -49,7 +53,7 @@ Instead of lecturing users on a theoretical adoption ladder, meet them at the **
 
 ## The Coaching Folder (`ictv-coach/`)
 
-Ensure the user's coaching folder pairs **plain Markdown files** (durable context for agents and humans) with **interactive HTML pages** (Generative UI views for reflection and exploration):
+Ensure the user's coaching folder pairs **plain Markdown files** (durable context for agents and humans) with **interactive HTML pages** (Generative UI workbenches with progressive disclosure that save choices directly to `.md` files):
 
 ```text
 ictv-coach/
@@ -58,7 +62,7 @@ ictv-coach/
 ├── assessment.html         # Interactive HTML assessment & ICTV Loop explorer
 ├── misses-ledger.md        # Real failures tagged to [I], [C], [T], or [V] + what changed
 ├── check-ins/              # Weekly review notes (YYYY-WXX.md) + interactive reflection (YYYY-WXX.html)
-└── handovers/              # Reusable task briefs (<task-slug>.md) with built-in Check Reports
+└── handovers/              # Option workbenches (<task>-workbench.html) & saved briefs (<task>-handover.md)
 ```
 
 ---
@@ -67,33 +71,29 @@ ictv-coach/
 
 1. **Check for Existing Context:** Look for `ictv-coach/profile.md` and `ictv-coach/active-focus.md`.
 2. **Audit History & Environment:** Follow [history-and-memory-audit.md](references/history-and-memory-audit.md) to inspect available conversation transcripts, memory/rules files (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`), skills, and connected tools.
-   * *If no history/files exist (cold start):* Ask **at most 3 conversational questions** (one at a time or as a tight group):
-     1. What kind of work do you mostly use AI for right now?
-     2. Where does it start to feel like extra work, or where do you lose trust in the output?
-     3. Is there a recurring task you wish you could hand over without reading every single word?
+   * *If no history/files exist (cold start):* Ask **at most 3 conversational questions** (or present concrete blocker scenarios to react to).
 3. **Hold Up the Mirror:** Share 1–2 concrete observations from their actual usage (what is already working well + the primary bottleneck holding them back).
 4. **Prescribe One Practice:** Map their bottleneck to **one small, concrete ICTV practice** for this week using [blocker-diagnostic-guide.md](references/blocker-diagnostic-guide.md). Remember the rule: *Start with less than you think you need.*
 5. **Save State & Generate Interactive HTML Assessment:**
    * Write or update `ictv-coach/profile.md` and `ictv-coach/active-focus.md`.
    * Generate `ictv-coach/assessment.html` based on [assessment-ui-template.html](resources/assessment-ui-template.html), populating the `#ictv-assessment-data` JSON payload with the user's actual audit findings, strengths, pillar observations, and tailored practice options.
-   * If the environment supports Generative UI artifacts (e.g., Antigravity or Claude Artifacts), also render the interactive HTML page directly in the UI so the user can click through the ICTV loop and customize their weekly commitment interactively. Offer to set up a weekly check-in reminder.
+   * Render the interactive HTML page so the user can explore the ICTV loop and save their `active-focus.md` file directly. Offer to set up a weekly check-in reminder.
 
 ---
 
-## Workflow 2: Unblock a Task (`unblock`)
+## Workflow 2: Option Workbench & Unblock (`unblock`)
 
-When the user brings a task they are struggling to delegate or want to make repeatable:
+When the user brings a new idea to explore or a task they want to delegate:
 
-1. **Test if the Job Earns a Handover:**
-   * Ask: *Will you do this more than twice with the same shape? Can we describe what "done" looks like? Is checking it manually becoming a chore?*
-   * If it is a **one-off**, fix only the single blocking letter (`I`, `C`, `T`, or `V`) in under 2 minutes and run it.
-   * If it is **repeatable**, guide a short **Handover Interview** (one round per letter, keeping it conversational):
-     * **I (Instructions):** What is the job, what does "done" look like, and what is explicitly *not acceptable*?
-     * **C (Context):** What background does it need to know, where do inputs live, and what format should the result arrive in?
-     * **T (Tools & Boundaries):** What can it read (*context plumbing*), what can it stage or change (*action tools*), and what is the **handbrake** (when must it stop and ask)?
-     * **V (Verification):** What are 3–5 tickable checks that must run *before* you read the draft?
-2. **Save the Handover:** Write the brief to `ictv-coach/handovers/<task-slug>.md` using [handover-template.md](resources/handover-template.md).
-3. **Execute with Check Report First:** When running the task, always output the **Check Report** (including `[Assumption]` tags and a `"Not checked:"` line) *before* presenting the draft.
+1. **Do Not Interrogate with Blank-Slate Questions:**
+   * If it is a tiny **one-off** chat fix, propose the single blocking letter fix (`I`, `C`, `T`, or `V`) in under 2 minutes and run it.
+   * If it is a **new exploration or repeatable workflow**, build an **Interactive Delegation Option Workbench** (`ictv-coach/handovers/<task-slug>-workbench.html`) using [option-workbench-ui-template.html](resources/option-workbench-ui-template.html):
+     * **Step 1 (Multi-Selectable Options with Progressive Disclosure):** Propose 3 distinct ways to approach the task (e.g., *Option A: Red-Team Challenger*, *Option B: Source-Locked Builder*, *Option C: Standing Weekly Scanner*). Include honest **Pros**, **Cons**, and **Where It Breaks** for each. Allow the user to **select one OR combine multiple options (such as B + C)**.
+     * **Step 2 (A vs. B Taste Calibrator):** Provide two short contrasting micro-samples of how the output could read so the user can react to concrete examples instead of describing abstract tone rules.
+     * **Step 3 (Pre-Populated ICTV Building Blocks):** Pre-draft 5–7 domain-smart rules across `I`, `C`, `T` (including a Handbrake), and `V` (including Stowaway defense) tagged to the options they come from. The user clicks to cycle `[KEEP]`, `[OPTIONAL]`, or `[STRIKE]` and can add their own rule.
+2. **Save Choices to `ictv-coach/handovers/<task-slug>-handover.md`:**
+   * The user clicks **Save `<task-slug>-handover.md`** in the workbench (or tells you which options/rules they toggled), and you write/read the saved `ictv-coach/handovers/<task-slug>-handover.md` file (formatted like [handover-template.md](resources/handover-template.md)) in the next step.
+3. **Execute with Check Report First:** When running the task from the saved handover file, always output the **Check Report** (including `[Assumption]` tags and a `"Not checked:"` line) *before* presenting the draft.
 
 ---
 

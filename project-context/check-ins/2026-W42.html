@@ -248,8 +248,8 @@
               <h2 class="text-base font-semibold text-[var(--foreground)]">Select Next Week's Single Step</h2>
               <p class="text-xs text-[var(--muted-foreground)]">Keep it small: change one variable at a time and keep earlier checks running.</p>
             </div>
-            <button onclick="copyWeeklyCheckinMarkdown()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold hover:opacity-90 transition-opacity">
-              ${copiedReport ? '✓ Copied Weekly Check-in Markdown!' : `Copy ${data.weekLabel}.md Summary`}
+            <button onclick="saveWeeklyCheckinFile()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold hover:opacity-90 transition-opacity">
+              ${copiedReport ? `✓ Saved ${data.weekLabel}.md!` : `Save ${data.weekLabel}.md to Folder`}
             </button>
           </div>
 
@@ -294,14 +294,37 @@
       render();
     };
 
-    window.copyWeeklyCheckinMarkdown = function() {
+    window.saveWeeklyCheckinFile = async function() {
       const nextChoice = data.nextWeekCandidates.find(c => c.id === selectedNextId) || data.nextWeekCandidates[0];
       const md = `# Weekly ICTV Check-in: ${data.weekLabel}\n\n*Date:* ${data.date}\n\n## 1. Practice Review\n- **Last Week's Focus:** ${data.committedPractice}\n- **Outcome:** ${commitmentStatus}\n\n## 2. Friction & Loop Summary\n- **Misses Logged (${data.misses.length}):**\n${data.misses.map(m => `  - **${m.task}** (${m.tags.map(t => `\`[${t}]\``).join(', ')}): ${m.symptom} → *Upgrade:* ${m.upgrade}`).join('\n')}\n\n## 3. Trust Calibration Snapshot\n- **Verification Habit:** ${reviewBehavior}\n- **Response to Misses:** ${missBehavior}\n\n## 4. Next Week's Single Step\n- **Selected Practice (\`[${nextChoice.letter}]\`):** ${nextChoice.title} — ${nextChoice.description}\n`;
-      navigator.clipboard.writeText(md).then(() => {
-        copiedReport = true;
-        render();
-        setTimeout(() => { copiedReport = false; render(); }, 2500);
-      });
+      const filename = `${data.weekLabel}.md`;
+
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{ description: 'Markdown File', accept: { 'text/markdown': ['.md'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(md);
+          await writable.close();
+          copiedReport = true;
+          render();
+          return;
+        } catch (err) {}
+      }
+
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      copiedReport = true;
+      render();
     };
 
     render();

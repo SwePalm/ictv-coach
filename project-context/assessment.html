@@ -245,8 +245,8 @@
                 class="w-full px-3 py-2 text-sm rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)]"
               />
             </div>
-            <button onclick="copyActiveFocusMarkdown()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-semibold hover:opacity-90 transition-opacity shrink-0">
-              ${copiedState ? '✓ Copied active-focus.md!' : 'Copy for active-focus.md'}
+            <button onclick="saveActiveFocusFile()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-semibold hover:opacity-90 transition-opacity shrink-0">
+              ${copiedState ? '✓ Saved active-focus.md!' : 'Save active-focus.md'}
             </button>
           </div>
         </div>
@@ -268,15 +268,38 @@
       customTaskNote = val;
     };
 
-    window.copyActiveFocusMarkdown = function() {
+    window.saveActiveFocusFile = async function() {
       const exp = data.experimentOptions.find(e => e.id === selectedExpId) || data.experimentOptions[0];
       const taskText = customTaskNote || exp.task;
       const md = `# Active Coaching Focus\n\n*Updated: ${data.date}*\n\n## Current Blocker\n- **How It Shows Up in My Work:** ${data.primaryBlockerHeadline}\n- **Primary ICTV Pillar Involved:** \`[${exp.letter}]\`\n\n## This Week's Practice Experiment\n- **The One Thing I'm Trying:** ${exp.title}\n- **Real Task to Test It On:** ${taskText}\n- **How We Know It Worked:** ${exp.successMetric}\n`;
-      navigator.clipboard.writeText(md).then(() => {
-        copiedState = true;
-        render();
-        setTimeout(() => { copiedState = false; render(); }, 2500);
-      });
+      const filename = 'active-focus.md';
+
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{ description: 'Markdown File', accept: { 'text/markdown': ['.md'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(md);
+          await writable.close();
+          copiedState = true;
+          render();
+          return;
+        } catch (err) {}
+      }
+
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      copiedState = true;
+      render();
     };
 
     render();

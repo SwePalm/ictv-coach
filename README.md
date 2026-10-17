@@ -94,7 +94,7 @@ ictv-coach/
 ├── assessment.html         # Interactive HTML assessment & clickable ICTV Loop explorer
 ├── misses-ledger.md        # The Loop Engine: real failures tagged to [I], [C], [T], or [V] + fixes
 ├── check-ins/              # Weekly 5-minute notes (YYYY-WXX.md) + interactive reflection UI (YYYY-WXX.html)
-└── handovers/              # Reusable task briefs (<task>.md) with built-in Check Reports
+└── handovers/              # Option workbenches (<task>-workbench.html) & saved briefs (<task>-handover.md)
 ```
 
 ---
@@ -103,7 +103,7 @@ ictv-coach/
 
 Once set up, just ask your AI:
 1. **"Assess how I use AI"** — Audits your recent transcripts/memory/files, reflects back what works and your #1 blocker, initializes `ictv-coach/`, and generates your interactive `assessment.html` dashboard.
-2. **"Help me unblock [task]"** — Runs a tailored clinic or 4-round **Handover Interview** (`I → C → T → V`) on a real task on your desk today.
+2. **"Help me unblock [task]" / "Explore [idea]"** — Instead of interrogating you with 10 blank-slate questions, generates an interactive **Delegation Option Workbench** (`<task>-workbench.html`) proposing 3 distinct ways to run the task (with Pros, Cons, and *"Where it breaks"*). Select one or combine multiple options (e.g., `B + C`), react to an A/B Taste Calibrator, toggle pre-drafted `I`, `C`, `T`, and `V` rules, and save `<task>-handover.md` directly to your folder.
 3. **"Tag this miss"** — When an AI output falls short, pauses manual rewriting to diagnose whether `[I]`, `[C]`, `[T]`, or `[V]` failed, upgrades your setup first, and logs it in `ictv-coach/misses-ledger.md`.
 4. **"Run my weekly ICTV check-in"** — Reviews the past week's sessions and misses, checks whether your trust grew, and generates both `YYYY-WXX.md` and an interactive `YYYY-WXX.html` reflection page.
 
@@ -118,6 +118,7 @@ Once set up, just ask your AI:
 | [`skills/ictv-coach/references/history-and-memory-audit.md`](skills/ictv-coach/references/history-and-memory-audit.md) | Playbook for auditing session transcripts, built-in chat memory, and workspace files before advising. |
 | [`skills/ictv-coach/references/verification-and-trust-playbook.md`](skills/ictv-coach/references/verification-and-trust-playbook.md) | Check Report Before Result, the mandatory `"Not checked"` boundary, defending against *The Stowaway*, and the Miss Tagging Loop. |
 | [`skills/ictv-coach/references/weekly-checkin-guide.md`](skills/ictv-coach/references/weekly-checkin-guide.md) | Protocol for the 10-minute weekly retrospective and recurring schedule setup. |
-| [`skills/ictv-coach/resources/`](skills/ictv-coach/resources/) | Markdown templates (`profile`, `active-focus`, `misses-ledger`, `handover`, `weekly-checkin`) + interactive HTML templates (`assessment-ui-template.html`, `weekly-reflection-ui-template.html`). |
+| [`skills/ictv-coach/resources/`](skills/ictv-coach/resources/) | Markdown templates + interactive HTML templates (`assessment-ui-template.html`, `option-workbench-ui-template.html`, `weekly-reflection-ui-template.html`). |
 | [`chat-edition/ICTV-COACH-PROMPT.md`](chat-edition/ICTV-COACH-PROMPT.md) | Standalone copy-paste prompt for ChatGPT Projects/Custom GPTs, Claude Projects, and Microsoft Copilot. |
-| [`project-context/`](project-context/brief.md) | Live example of dogfooding ICTV on this repo itself (`brief.md`, `decisions.md`, `misses-ledger.md`, `check-report.md`, `assessment.html`, and `check-ins/2026-W42.html`). |
+| [`project-context/`](project-context/brief.md) | Live example of dogfooding ICTV on this repo itself (`brief.md`, `decisions.md`, `misses-ledger.md`, `check-report.md`, `assessment.html`, `handovers/`, and `check-ins/2026-W42.html`). |
+
