@@ -40,13 +40,13 @@
 
 ## D7 — Pages Are Self-Contained: No Network, One Shared Look
 * **Subject:** `self-contained-pages`
-* **Status:** Proposed (2026-11-11)
+* **Status:** Accepted (2026-11-11)
 * **Decision:** The three HTML templates carry their own styles and script and load nothing from the network. They keep reading the host app's theme variables when those exist. The look and helpers live once in `tools/shared/` and are copied into each template by `node tools/check.mjs --fix`, so every page is still a single file. The coach generates a page by replacing only the JSON data payload.
 * **Rationale:** The templates depended on a stylesheet script hosted for one vendor's app. Anywhere that script is blocked or unavailable (offline, other assistants' artifact viewers, a locked-down company network) the pages lose all styling, which breaks the promise that context is owned and portable.
 
 ## D8 — The Repo Runs Its Own Check Report
 * **Subject:** `deterministic-repo-checks`
-* **Status:** Proposed (2026-11-11)
+* **Status:** Accepted (2026-11-11)
 * **Decision:** `tools/check.mjs` is the repo's written-down definition of good, run locally and on every push. It prints a Check Report with a "Not checked" list. Each real miss on this repo adds a check to it.
 * **Rationale:** The earlier Check Report was written by hand, and the check script it referred to was never committed. Checks that run before a human reads the change are the far end of Verification, and the repo should show that practice, not only describe it.
 
