@@ -58,6 +58,6 @@
 
 ## D10 — The Rule of Three for Suggestions: Change the Way of Learning, Don't Repeat
 * **Subject:** `prune-suggestions`
-* **Status:** Proposed (2026-11-11)
+* **Status:** Accepted (2026-11-11)
 * **Decision:** The coach offers at most three candidate next steps. A practice left untested at two check-ins in a row is not offered a third time. It is retired without blame, and the same goal is offered through a different way of learning (do it, watch it, compare it, spot it, have it done). The way that works is recorded in `profile.md`. Stale blockers are removed, not carried forward.
 * **Rationale:** People learn in different ways, as in golf practice: if one method does not work, try another. A coach that repeats an unused suggestion forever becomes noise, and stale advice erodes trust in the rest.
