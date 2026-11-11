@@ -214,6 +214,17 @@ check('The workbench flags a handover with no handbrake, and writes the gap into
   return problems;
 });
 
+check('Pages offer at most three choices where the person must pick one (the rule of three)', () => {
+  const problems = [];
+  const lists = { 'ictv-assessment-data': 'experimentOptions', 'ictv-workbench-data': 'options', 'ictv-weekly-data': 'nextWeekCandidates' };
+  for (const page of PAGES) {
+    const { payload } = loadPage(page);
+    const key = lists[page.payloadId];
+    if (payload[key].length > 3) problems.push(`${page.file}: "${key}" has ${payload[key].length} entries`);
+  }
+  return problems;
+});
+
 check('Relative links in Markdown files point at files that exist', () => {
   const problems = [];
   for (const file of files.filter(f => f.endsWith('.md'))) {

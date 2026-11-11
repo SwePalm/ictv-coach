@@ -108,7 +108,7 @@ button { cursor: pointer; }
   </style>
 </head>
 <body>
-  <!-- Data payload. The coach fills this JSON with the week's real misses and candidate next steps. Optional keys: misses[].check, nextWeekCandidates[].successMetric.
+  <!-- Data payload. The coach fills this JSON with the week's real misses and candidate next steps. Optional keys: misses[].check, nextWeekCandidates[].successMetric, nextWeekCandidates[].way (how the practice is learned: Do it, Watch it, Compare it, Spot it, Have it done). Offer at most three candidates.
        Write plain text only (the page escapes it), keep it valid JSON, and never include a closing script tag. -->
   <script id="ictv-weekly-data" type="application/json">
   {
@@ -129,18 +129,21 @@ button { cursor: pointer; }
       {
         "id": "next-1",
         "letter": "V",
+        "way": "Spot it",
         "title": "Mutation Test One Verification Check",
         "description": "Inject 1 deliberate flaw (e.g., an unverified citation or banned buzzword) into a sample draft to confirm your Check Report catches it."
       },
       {
         "id": "next-2",
         "letter": "I",
+        "way": "Do it",
         "title": "Convert One Repeating Task into a Handover File",
         "description": "Run the 5-minute Handover Interview on a task you do weekly and save it to ictv-coach/handovers/."
       },
       {
         "id": "next-3",
         "letter": "C",
+        "way": "Do it",
         "title": "Apply the 3x Paste Rule to One Project Folder",
         "description": "Move any background or audience rules you typed more than twice this week into a plain Markdown file."
       }
@@ -262,7 +265,7 @@ const ICTV = (() => {
       { key: 'commitment', title: "1. This week's practice", options: [
         { id: 'kept', label: 'Tested and worth keeping' },
         { id: 'tweaked', label: 'Tried it, needs a small tweak' },
-        { id: 'skipped', label: 'Did not get to test it' }
+        { id: 'skipped', label: 'Did not get to test it', note: 'No blame. Next week, try the same goal a different way, not the same suggestion again.' }
       ] },
       { key: 'review', title: '2. How I checked results', options: [
         { id: 'check-report-first', label: 'Read the Check Report before the draft' },
@@ -321,7 +324,7 @@ ${data.misses.map(missLine).join('\n') || '  - None logged this week.'}
 - **When a Result Missed:** ${answer('onMiss').label}
 
 ## 4. Next Week's Single Step
-- **One Practice to Try Next Week (\`[${oneLine(next.letter)}]\`):** ${oneLine(next.title)}. ${oneLine(next.description)}
+- **One Practice to Try Next Week (\`[${oneLine(next.letter)}]\`):** ${oneLine(next.title)}. ${oneLine(next.description)}${next.way ? `\n- **Way of Learning:** ${oneLine(next.way)}` : ''}
 - **Target Task:** ${oneLine(state.nextTask) || '[Specific task on next week\'s calendar]'}
 ${fresh.length ? `
 ## 5. To Append to \`misses-ledger.md\`
@@ -488,7 +491,7 @@ ${fresh.map(m => `### ${oneLine(m.date)} — ${oneLine(m.task)} — Tagged: ${ta
           <div class="grid three">
             ${data.nextWeekCandidates.map(c => `
               <button class="choice" aria-pressed="${c.id === state.nextId}" data-action="selectNext" data-arg="${esc(c.id)}" data-key="next-${esc(c.id)}">
-                <span class="row"><span class="tag">${esc(c.letter)}</span>${c.id === state.nextId ? '<span class="tag on">Selected</span>' : ''}</span>
+                <span class="row"><span class="row start" style="gap: 6px"><span class="tag">${esc(c.letter)}</span>${c.way ? `<span class="tag">${esc(c.way)}</span>` : ''}</span>${c.id === state.nextId ? '<span class="tag on">Selected</span>' : ''}</span>
                 <span class="strong">${esc(c.title)}</span>
                 <span class="muted small">${esc(c.description)}</span>
               </button>`).join('')}

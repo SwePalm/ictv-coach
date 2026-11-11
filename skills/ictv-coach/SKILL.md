@@ -114,7 +114,7 @@ When an AI output has an error, wrong tone, hallucinated source, or poor structu
    * **`[C]` Context miss:** The agent had to guess background knowledge, terminology, or examples that weren't in the folder.
    * **`[T]` Tool miss:** The agent guessed something it should have fetched/computed deterministically, or had the wrong access boundary.
 3. **Upgrade the System First:** Edit the relevant file in `ictv-coach/handovers/` or project context *first*. Change one thing at a time and keep earlier checks in place.
-4. **Every Miss Ends with a Check:** Whatever the root cause, also add or tighten one check in the task's handover so the same flaw is caught before the user reads the next result. A miss fixed only in `I`, `C`, or `T` can return unnoticed.
+4. **Every Miss Ends with a Check:** Whatever the root cause, also add or tighten one check in the task's handover so the same flaw is caught before the user reads the next result. A miss fixed only in `I`, `C`, or `T` can return unnoticed. **Tighten before you add:** if an existing check should have caught the miss, sharpen that one instead of writing a new one.
 5. **Log and Re-Run:** Append a short entry to `ictv-coach/misses-ledger.md` (what went wrong, why it slipped through, what changed, the new check), then re-generate the output using the upgraded setup.
 
 ---
@@ -128,9 +128,10 @@ Follow [weekly-checkin-guide.md](references/weekly-checkin-guide.md) to run a 10
    * Did we try this week's committed practice?
    * Which letter (`I`, `C`, `T`, `V`) accounted for most friction or rewrites this week?
    * **Trust Calibration Check:** Are you reading fewer raw drafts from top to bottom because your Check Reports are catching issues first? Or is *criteria drift* (skimming without checks) creeping in?
-3. **Choose Next Week's Single Step:** Agree on one small adjustment for the coming week and update `ictv-coach/active-focus.md`.
-4. **Save the Check-in & Generate Interactive HTML Reflection:**
+3. **Prune:** Keep checks and suggestions few enough to stay alive. Merge or drop checks that no longer earn their place, and retire any practice the user has skipped twice. Follow the pruning rules in [weekly-checkin-guide.md](references/weekly-checkin-guide.md).
+4. **Choose Next Week's Single Step:** Agree on one small adjustment for the coming week and update `ictv-coach/active-focus.md`. Offer at most three candidates. If last week's practice was skipped, offer the same goal through a different way of learning rather than repeating the suggestion.
+5. **Save the Check-in & Generate Interactive HTML Reflection:**
    * Write the Markdown summary to `ictv-coach/check-ins/YYYY-WXX.md`.
    * Generate the interactive HTML reflection at `ictv-coach/check-ins/YYYY-WXX.html` using [weekly-reflection-ui-template.html](resources/weekly-reflection-ui-template.html), populated with the week's real misses, trust calibration options, and next week's candidate experiments (and render it in the UI when supported).
    * The page saves both `YYYY-WXX.md` and next week's `active-focus.md`. If the saved check-in has a **To Append to `misses-ledger.md`** section, copy those entries into the ledger.
-5. **Schedule Next Check-in:** If no recurring schedule exists yet, offer to schedule a weekly check-in (using `/schedule` or the platform's scheduled automation tool).
+6. **Schedule Next Check-in:** If no recurring schedule exists yet, offer to schedule a weekly check-in (using `/schedule` or the platform's scheduled automation tool).
