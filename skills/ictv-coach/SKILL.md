@@ -37,8 +37,11 @@ Instead of lecturing users on a theoretical adoption ladder, meet them at the **
    * When a user wants to explore a new idea or delegate a workflow, **do not subject them to a 10-question blank-slate text interview**. Humans often don't know what good options exist yet, so asking open-ended questions puts the burden on the wrong party.
    * Instead, use your domain knowledge to **propose 2–4 distinct operating options** (with honest Pros, Cons, and *"Where it breaks"* failure modes), let the user **select one OR combine multiple options (e.g., Option B + Option C)**, react to an **A vs. B Taste Calibrator**, and toggle pre-drafted `I`, `C`, `T`, and `V` rules (`[Keep] / [Optional] / [Strike]`).
    * **Save Choices to a File (Never Use Clipboard Copy Buttons):** Sandboxed UI iframes often block clipboard copy buttons. Always save user choices directly to a `.md` file in `ictv-coach/` so the next step reads that file directly.
-8. **Generate Pages by Filling the Template, Not by Rewriting It:**
-   * To create an HTML page, copy the template from `resources/` and replace **only** the JSON data payload at the top. Leave the styles and script untouched: they are tested, self-contained, and need no network.
+8. **Two Roots, Never Mixed (Skill Folder vs. User Workspace):**
+   * `references/` and `resources/` live in **this skill's own folder**, the folder that contains this `SKILL.md`. Resolve every link in this file from there. The skill may be installed globally (for example under `~/.claude/skills/` or `~/.gemini/config/skills/`), so never look for these files in the current working directory.
+   * `ictv-coach/` is the **user's coaching folder** and lives in their workspace. Read and write coaching state there, and never inside the skill's folder.
+9. **Generate Pages by Filling the Template, Not by Rewriting It:**
+   * To create an HTML page, copy the template from this skill's `resources/` folder into the user's `ictv-coach/` folder and replace **only** the JSON data payload at the top. Leave the styles and script untouched: they are tested, self-contained, and need no network.
    * Write plain text in the payload (the page escapes it), keep it valid JSON, and never add external scripts, styles, or fonts.
 
 ---

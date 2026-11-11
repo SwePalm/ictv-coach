@@ -248,6 +248,13 @@ check('The skill has a name and a description, and the name matches its folder',
   return problems;
 });
 
+check('Every link in SKILL.md stays inside the skill folder, so a global install still works', () => {
+  const skill = read('skills/ictv-coach/SKILL.md');
+  return [...skill.matchAll(/\]\(([^)\s]+)\)/g)].map(m => m[1])
+    .filter(target => !/^(https?:|#)/.test(target) && !/^(references|resources)\//.test(target))
+    .map(target => `SKILL.md links outside its own folder: ${target}`);
+});
+
 check('Coaching material stays in plain language (no developer jargon)', () =>
   textFiles.filter(f => PLAIN_LANGUAGE_PATHS.some(p => f.startsWith(`${p}/`)))
     .flatMap(f => read(f).split('\n').map((line, i) => ({ f, line, n: i + 1 })))

@@ -20,6 +20,7 @@ If a human just gave you this repository link and asked *"Help me use this"*, *"
 1. **Install the Skill:**
    * If you are already inside a clone of this repo, `.agents/skills/ictv-coach` and `.claude/skills/ictv-coach` are pre-linked.
    * Otherwise, clone or copy [`skills/ictv-coach/`](skills/ictv-coach/SKILL.md) into the user's workspace at `.agents/skills/ictv-coach/` (or their global skills directory, such as `~/.gemini/config/skills/ictv-coach` or `~/.claude/skills/ictv-coach`).
+   * Wherever the skill is installed, its `references/` and `resources/` files are found next to its `SKILL.md`, not in the current working directory. The user's `ictv-coach/` folder is separate and lives in their workspace.
 2. **Load the Skill Instructions:** Read [`skills/ictv-coach/SKILL.md`](skills/ictv-coach/SKILL.md) and [`skills/ictv-coach/references/history-and-memory-audit.md`](skills/ictv-coach/references/history-and-memory-audit.md).
 3. **Run Workflow 1 (`assess`) Immediately:**
    * Audit available workspace rules, memory files, and recent session transcripts for how the user currently works with AI.
