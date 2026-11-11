@@ -139,3 +139,9 @@ The pages share one look and one set of helpers, kept in [`tools/shared/`](tools
 | [`chat-edition/ICTV-COACH-PROMPT.md`](chat-edition/ICTV-COACH-PROMPT.md) | Standalone copy-paste prompt for ChatGPT Projects/Custom GPTs, Claude Projects, and Microsoft Copilot. |
 | [`project-context/`](project-context/brief.md) | Live example of dogfooding ICTV on this repo itself (`brief.md`, `decisions.md`, `misses-ledger.md`, `check-report.md`, `assessment.html`, `handovers/`, and `check-ins/2026-W42.html`). |
 
+
+---
+
+## License
+
+[MIT](LICENSE). Use it, change it, and share it freely, including commercially. Keep the copyright notice so the credit travels with it.
