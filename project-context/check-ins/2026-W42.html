@@ -3,11 +3,113 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ICTV Weekly Reflection & Loop Review</title>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <title>ICTV Weekly Check-in</title>
+  <!-- Self-contained on purpose: no external scripts, styles or fonts, so the page opens anywhere. -->
+  <style>
+/* ictv-shared:css:start */
+/* Shared look for every ICTV Coach page. Edit here, then run: node tools/check.mjs --fix
+   Colours fall back to the host app's theme variables when the page is shown inside one. */
+:root {
+  color-scheme: light dark;
+  --ictv-bg: var(--background, #f5f6f8);
+  --ictv-surface: var(--card, #ffffff);
+  --ictv-sunken: var(--secondary, #eef1f5);
+  --ictv-line: var(--border, #d9dee7);
+  --ictv-text: var(--foreground, #131a26);
+  --ictv-muted: var(--muted-foreground, #545f71);
+  --ictv-accent: var(--primary, #0a66c2);
+  --ictv-on-accent: var(--primary-foreground, #ffffff);
+  --ictv-warn: #b45309;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ictv-bg: var(--background, #0c1118);
+    --ictv-surface: var(--card, #151c27);
+    --ictv-sunken: var(--secondary, #1c2533);
+    --ictv-line: var(--border, #2b3647);
+    --ictv-text: var(--foreground, #eef2f7);
+    --ictv-muted: var(--muted-foreground, #9aa6b8);
+    --ictv-accent: var(--primary, #5cb3ff);
+    --ictv-on-accent: var(--primary-foreground, #08111c);
+    --ictv-warn: #f5b041;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px 16px 48px;
+  background: var(--ictv-bg);
+  color: var(--ictv-text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+#app { max-width: 880px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2, h3, p, ul { margin: 0; }
+h1 { font-size: 22px; line-height: 1.25; }
+h2 { font-size: 16px; }
+h3 { font-size: 14px; }
+ul { padding-left: 18px; }
+code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ictv-accent); outline-offset: 2px; }
+
+.card { background: var(--ictv-surface); border: 1px solid var(--ictv-line); border-radius: 14px; padding: 22px; display: grid; gap: 14px; }
+.panel { background: var(--ictv-sunken); border: 1px solid var(--ictv-line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.panel.plain { background: var(--ictv-surface); }
+.panel.key { border: 2px solid var(--ictv-accent); }
+.row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.row.start { justify-content: flex-start; }
+.row.end { align-items: flex-end; }
+.stack { display: grid; gap: 10px; align-content: start; }
+.grow { flex: 1 1 220px; min-width: 0; }
+.grid { display: grid; gap: 12px; }
+@media (min-width: 720px) {
+  .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 719px) { .grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ictv-accent); }
+.eyebrow.quiet { color: var(--ictv-muted); }
+.muted { color: var(--ictv-muted); }
+.small { font-size: 13px; }
+.strong { font-weight: 600; }
+.warn { color: var(--ictv-warn); }
+.struck { text-decoration: line-through; color: var(--ictv-muted); }
+.pre { white-space: pre-line; }
+
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--ictv-line); background: var(--ictv-surface); white-space: nowrap; }
+.tag.on { background: var(--ictv-accent); border-color: var(--ictv-accent); color: var(--ictv-on-accent); }
+
+.btn { border: 1px solid var(--ictv-line); background: var(--ictv-sunken); border-radius: 9px; padding: 8px 14px; font-size: 13px; font-weight: 600; }
+.btn:hover { border-color: var(--ictv-accent); }
+.btn.primary { background: var(--ictv-accent); border-color: var(--ictv-accent); color: var(--ictv-on-accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.link { border: 0; background: none; padding: 0; color: var(--ictv-accent); text-decoration: underline; font-weight: 500; }
+.btn.small { padding: 5px 10px; }
+
+.choice { display: grid; gap: 6px; align-content: start; width: 100%; text-align: left; background: var(--ictv-bg); border: 1px solid var(--ictv-line); border-radius: 12px; padding: 14px; }
+.choice:hover { border-color: var(--ictv-accent); }
+.choice[aria-pressed="true"] { background: var(--ictv-sunken); border-color: var(--ictv-accent); box-shadow: inset 0 0 0 1px var(--ictv-accent); }
+.choice.slim { padding: 8px 12px; border-radius: 9px; font-size: 13px; font-weight: 500; }
+.choice.slim[aria-pressed="true"] { background: var(--ictv-accent); color: var(--ictv-on-accent); }
+
+.field { display: grid; gap: 4px; font-size: 12.5px; color: var(--ictv-muted); }
+.field input, .field select, .field textarea { width: 100%; background: var(--ictv-bg); color: var(--ictv-text); border: 1px solid var(--ictv-line); border-radius: 9px; padding: 8px 10px; font-size: 14px; }
+.field textarea { resize: vertical; min-height: 64px; line-height: 1.4; }
+.sample { background: var(--ictv-surface); border: 1px solid var(--ictv-line); border-radius: 8px; padding: 10px; white-space: pre-line; }
+.filepreview { margin: 0; background: var(--ictv-bg); border: 1px solid var(--ictv-line); border-radius: 10px; padding: 14px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 460px; overflow: auto; }
+.checks { list-style: none; padding: 0; display: grid; gap: 6px; font-size: 13.5px; }
+.checks li { display: grid; grid-template-columns: 20px 1fr; gap: 6px; }
+@media print { .btn, .noprint { display: none; } body { background: #fff; } }
+/* ictv-shared:css:end */
+  </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-6">
-  <!-- Data Payload: Coach populates this JSON object with the week's real misses and focus -->
+<body>
+  <!-- Data payload. The coach fills this JSON with the week's real misses and candidate next steps. Optional keys: misses[].check, nextWeekCandidates[].successMetric.
+       Write plain text only (the page escapes it), keep it valid JSON, and never include a closing script tag. -->
   <script id="ictv-weekly-data" type="application/json">
   {
     "weekLabel": "2026-W42",
@@ -46,288 +148,374 @@
   }
   </script>
 
-  <div class="max-w-4xl mx-auto space-y-6" id="app"></div>
+  <main id="app"></main>
 
   <script>
-    (function ensureStandaloneTheme() {
-      const root = document.documentElement;
-      const computed = getComputedStyle(root).getPropertyValue('--card').trim();
-      if (!computed) {
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const vars = prefersDark ? {
-          '--background': '#0b0f17',
-          '--card': '#131b2e',
-          '--content': '#182238',
-          '--border': '#26324d',
-          '--foreground': '#f1f5f9',
-          '--muted-foreground': '#94a3b8',
-          '--primary': '#38bdf8',
-          '--primary-foreground': '#090d16',
-          '--secondary': '#1e293b',
-          '--secondary-foreground': '#e2e8f0',
-          '--accent': '#1e293b'
-        } : {
-          '--background': '#f8fafc',
-          '--card': '#ffffff',
-          '--content': '#f1f5f9',
-          '--border': '#e2e8f0',
-          '--foreground': '#0f172a',
-          '--muted-foreground': '#475569',
-          '--primary': '#0284c7',
-          '--primary-foreground': '#ffffff',
-          '--secondary': '#f1f5f9',
-          '--secondary-foreground': '#0f172a',
-          '--accent': '#e2e8f0'
-        };
-        Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+/* ictv-shared:js:start */
+// Shared helpers for every ICTV Coach page. Edit here, then run: node tools/check.mjs --fix
+const ICTV = (() => {
+  const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+  // Everything from the data payload or typed by the person goes through esc() before it becomes HTML.
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ESCAPES[ch]);
+
+  // Keeps a value on one line so it cannot break the structure of a saved Markdown file.
+  const oneLine = value => String(value ?? '').replace(/\s*\n\s*/g, ' ').trim();
+
+  const readPayload = id => JSON.parse(document.getElementById(id).textContent);
+
+  // Returns 'saved' (written where the person chose), 'downloaded' (sent to the Downloads folder),
+  // 'cancelled' (the person closed the dialog) or 'blocked' (this viewer allows neither).
+  async function saveTextFile(filename, text) {
+    if (typeof window.showSaveFilePicker === 'function') {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{ description: 'Markdown file', accept: { 'text/markdown': ['.md'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(text);
+        await writable.close();
+        return 'saved';
+      } catch (err) {
+        if (err && err.name === 'AbortError') return 'cancelled';
+        // Embedded viewers refuse the dialog. Fall through to a plain download.
       }
-    })();
-
-    const data = JSON.parse(document.getElementById('ictv-weekly-data').textContent);
-    let filterLetter = 'ALL';
-    let commitmentStatus = 'kept';
-    let reviewBehavior = 'check-report-first';
-    let missBehavior = 'tagged-and-upgraded';
-    let selectedNextId = data.nextWeekCandidates[0].id;
-    let newMissTask = '';
-    let newMissTag = 'V';
-    let newMissSymptom = '';
-    let newMissUpgrade = '';
-    let copiedReport = false;
-
-    const tagHints = {
-      V: 'Verification miss: Our checks passed even though the output had a flaw. Fix: Add a new tickable check or "Not checked" rule.',
-      I: 'Instruction miss: The objective or "Not acceptable" boundary was vague. Fix: Tighten the handover instruction.',
-      C: 'Context miss: The AI had to guess background facts, audience, or examples. Fix: Move the missing context into a folder file.',
-      T: 'Tool miss: The AI guessed something a tool or script should have fetched or calculated deterministically.'
-    };
-
-    function countByLetter(letter) {
-      return data.misses.filter(m => m.tags.includes(letter)).length;
     }
+    try {
+      const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return 'downloaded';
+    } catch (err) {
+      return 'blocked';
+    }
+  }
 
+  function saveMessage(result, filename, folder) {
+    const name = `<strong>${esc(filename)}</strong>`;
+    const where = `<code>${esc(folder)}</code>`;
+    if (result === 'saved') return `Saved ${name}. Keep it in ${where} so your assistant reads it next time.`;
+    if (result === 'downloaded') return `${name} was sent to your downloads. Move it to ${where}. If no file appeared, the full text is below: select it and save it under that name.`;
+    if (result === 'blocked') return `This viewer does not allow saving files. The full text of ${name} is below: select it and save it in ${where}.`;
+    return '';
+  }
+
+  // Draws view() into root and redraws after every action. Buttons carry data-action (and an optional
+  // data-arg); fields carry data-input. Typing updates state without a full redraw, so the cursor never
+  // jumps; only regions marked data-live="name" are refreshed, from live[name](). data-key lets keyboard
+  // focus survive a redraw.
+  function mount(root, view, actions, live = {}) {
     function render() {
-      const app = document.getElementById('app');
-      const filteredMisses = filterLetter === 'ALL'
-        ? data.misses
-        : data.misses.filter(m => m.tags.includes(filterLetter));
+      const active = document.activeElement;
+      const key = active && active.getAttribute ? active.getAttribute('data-key') : null;
+      root.innerHTML = view();
+      if (!key) return;
+      for (const el of root.querySelectorAll('[data-key]')) {
+        if (el.getAttribute('data-key') === key) { el.focus(); break; }
+      }
+    }
+    root.addEventListener('click', event => {
+      const el = event.target.closest ? event.target.closest('[data-action]') : null;
+      if (!el || !root.contains(el)) return;
+      const action = actions[el.getAttribute('data-action')];
+      if (action) Promise.resolve(action(el.getAttribute('data-arg'))).then(render);
+    });
+    root.addEventListener('input', event => {
+      const el = event.target;
+      const name = el && el.getAttribute ? el.getAttribute('data-input') : null;
+      if (!name || !actions[name]) return;
+      actions[name](el.value);
+      for (const region of root.querySelectorAll('[data-live]')) {
+        const draw = live[region.getAttribute('data-live')];
+        if (draw) region.innerHTML = draw();
+      }
+    });
+    root.addEventListener('keydown', event => {
+      const el = event.target;
+      const name = event.key === 'Enter' && el && el.getAttribute ? el.getAttribute('data-enter') : null;
+      if (name && actions[name]) { event.preventDefault(); Promise.resolve(actions[name]()).then(render); }
+    });
+    render();
+    return render;
+  }
 
-      app.innerHTML = `
-        <!-- Header -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
-            <div>
-              <div class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">ICTV Coach · Weekly Loop Reflection</div>
-              <h1 class="text-xl font-bold mt-1 text-[var(--foreground)]">Week ${data.weekLabel} Review</h1>
-              <p class="text-sm text-[var(--muted-foreground)] mt-0.5">Committed Practice: <span class="text-[var(--foreground)] font-medium">${data.committedPractice}</span></p>
-            </div>
-            <div class="text-xs px-3 py-1.5 rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-              ${data.date}
-            </div>
-          </div>
+  const LETTERS = {
+    V: { name: 'Verification', hint: 'A flaw got through because no written-down check would have caught it.' },
+    I: { name: 'Instructions', hint: 'The goal or a "not acceptable" boundary was unstated or vague.' },
+    C: { name: 'Context', hint: 'The assistant had to guess background, audience or examples that live in your head.' },
+    T: { name: 'Tools', hint: 'The assistant guessed something it should have looked up or calculated, or it had the wrong access.' }
+  };
 
-          <!-- 3-Part Interactive Trust Calibration Check -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
-            <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)]">
-              <div class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">1. This Week's Practice</div>
-              <div class="mt-2.5 space-y-1.5">
-                ${[
-                  { id: 'kept', label: '✓ Tested & worth keeping' },
-                  { id: 'tweaked', label: '↻ Tried, needs a small tweak' },
-                  { id: 'skipped', label: '○ Didn’t get to test it yet' }
-                ].map(opt => `
-                  <button onclick="setCommitmentStatus('${opt.id}')" class="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${commitmentStatus === opt.id ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)]'}">
-                    ${opt.label}
-                  </button>
-                `).join('')}
-              </div>
-            </div>
+  return { esc, oneLine, readPayload, saveTextFile, saveMessage, mount, LETTERS };
+})();
+/* ictv-shared:js:end */
 
-            <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)]">
-              <div class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">2. How I Verified Outputs</div>
-              <div class="mt-2.5 space-y-1.5">
-                ${[
-                  { id: 'check-report-first', label: '✓ Read Check Report before draft' },
-                  { id: 'read-every-word', label: '⚠ Read every word myself (bottleneck)' },
-                  { id: 'skimmed', label: '⚠ Skimmed fluent text (criteria drift risk)' }
-                ].map(opt => `
-                  <button onclick="setReviewBehavior('${opt.id}')" class="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${reviewBehavior === opt.id ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)]'}">
-                    ${opt.label}
-                  </button>
-                `).join('')}
-              </div>
-            </div>
+    const data = ICTV.readPayload('ictv-weekly-data');
+    const { esc, oneLine } = ICTV;
+    const QUESTIONS = [
+      { key: 'commitment', title: "1. This week's practice", options: [
+        { id: 'kept', label: 'Tested and worth keeping' },
+        { id: 'tweaked', label: 'Tried it, needs a small tweak' },
+        { id: 'skipped', label: 'Did not get to test it' }
+      ] },
+      { key: 'review', title: '2. How I checked results', options: [
+        { id: 'check-report-first', label: 'Read the Check Report before the draft' },
+        { id: 'read-every-word', label: 'Read every word myself', note: 'You are the bottleneck.' },
+        { id: 'skimmed', label: 'Skimmed text that sounded right', note: 'This is how errors slip through.' }
+      ] },
+      { key: 'onMiss', title: '3. When a result missed', options: [
+        { id: 'tagged-and-upgraded', label: 'Tagged the miss and fixed the setup' },
+        { id: 'reprompted-in-chat', label: 'Argued with the assistant for 4+ turns' },
+        { id: 'rewrote-by-hand', label: 'Rewrote the draft by hand', note: 'The setup learned nothing.' }
+      ] }
+    ];
+    const state = {
+      filter: 'ALL',
+      commitment: 'kept',
+      review: 'check-report-first',
+      onMiss: 'tagged-and-upgraded',
+      nextId: data.nextWeekCandidates[0].id,
+      nextTask: '',
+      draft: { task: '', tags: ['V'], symptom: '', upgrade: '', check: '' },
+      preview: '',
+      saveResult: '',
+      savedFile: ''
+    };
+    const answer = key => QUESTIONS.find(q => q.key === key).options.find(o => o.id === state[key]);
+    const nextChoice = () => data.nextWeekCandidates.find(c => c.id === state.nextId) || data.nextWeekCandidates[0];
+    const count = letter => data.misses.filter(m => m.tags.includes(letter)).length;
+    // The letter behind most misses this week. Ties go to V, because a new check helps whatever the cause.
+    function dominantLetter() {
+      if (!data.misses.length) return '';
+      return ['V', 'I', 'C', 'T'].reduce((best, l) => (count(l) > count(best) ? l : best), 'V');
+    }
+    const checkinFile = () => `${data.weekLabel}.md`;
+    const tags = m => m.tags.map(t => `\`[${t}]\``).join(' + ');
 
-            <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)]">
-              <div class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">3. When an Output Missed</div>
-              <div class="mt-2.5 space-y-1.5">
-                ${[
-                  { id: 'tagged-and-upgraded', label: '✓ Tagged [I/C/T/V] & updated folder' },
-                  { id: 'reprompted-in-chat', label: '↻ Argued with AI across 4+ chat turns' },
-                  { id: 'rewrote-by-hand', label: '⚠ Rewrote the draft manually myself' }
-                ].map(opt => `
-                  <button onclick="setMissBehavior('${opt.id}')" class="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${missBehavior === opt.id ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)]'}">
-                    ${opt.label}
-                  </button>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        </div>
+    function buildCheckinMarkdown() {
+      const next = nextChoice();
+      const fresh = data.misses.filter(m => m.isNew);
+      const dominant = dominantLetter();
+      const missLine = m => `  - **${oneLine(m.task)}** (${tags(m)}): ${oneLine(m.symptom)} → *Upgrade:* ${oneLine(m.upgrade)}${m.check ? ` → *New check:* ${oneLine(m.check)}` : ''}`;
+      return `# Weekly ICTV Check-in: ${oneLine(data.weekLabel)}
 
-        <!-- Misses Ledger & Interactive Tagger -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-5">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 class="text-base font-semibold text-[var(--foreground)]">Misses Tagged This Week (The Loop Engine)</h2>
-              <p class="text-xs text-[var(--muted-foreground)]">Every miss tagged to I, C, T, or V upgrades your system so the same failure never repeats.</p>
-            </div>
-            <!-- Letter Filter Pills -->
-            <div class="flex items-center gap-1.5">
-              ${['ALL', 'V', 'I', 'C', 'T'].map(l => `
-                <button onclick="setFilter('${l}')" class="px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${filterLetter === l ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--secondary)] text-[var(--foreground)] border-[var(--border)]'}">
-                  ${l === 'ALL' ? `All (${data.misses.length})` : `[${l}] (${countByLetter(l)})`}
-                </button>
-              `).join('')}
-            </div>
-          </div>
+*Date:* ${oneLine(data.date)}
 
-          <!-- Logged Misses List -->
-          <div class="space-y-3">
-            ${filteredMisses.length === 0 ? `
-              <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] text-xs text-[var(--muted-foreground)]">
-                No misses logged for [${filterLetter}] yet. Use the quick tagger below to log a moment where AI fell short this week.
-              </div>
-            ` : filteredMisses.map(m => `
-              <div class="p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] space-y-1.5">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div class="text-sm font-semibold text-[var(--foreground)]">${m.task}</div>
-                  <div class="flex items-center gap-1.5">
-                    ${m.tags.map(t => `<span class="text-xs font-bold px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)]">[${t}]</span>`).join('')}
-                    <span class="text-xs text-[var(--muted-foreground)]">${m.date}</span>
-                  </div>
-                </div>
-                <p class="text-xs text-[var(--muted-foreground)]"><strong class="text-[var(--foreground)]">What went wrong:</strong> ${m.symptom}</p>
-                <p class="text-xs text-[var(--foreground)]"><strong class="text-[var(--primary)]">System upgrade applied:</strong> ${m.upgrade}</p>
-              </div>
-            `).join('')}
-          </div>
+## 1. Practice Review
+- **Last Week's Focus:** ${oneLine(data.committedPractice)}
+- **Outcome:** ${answer('commitment').label}
 
-          <!-- Interactive Quick Miss Tagger -->
-          <div class="p-4 rounded-xl bg-[var(--background)] border border-[var(--border)] space-y-3">
-            <div class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">+ Log & Tag Another Miss from This Week</div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div class="sm:col-span-2">
-                <label class="block text-xs text-[var(--muted-foreground)] mb-1">Task where AI disappointed or needed fixing:</label>
-                <input type="text" placeholder="e.g., Client proposal summary" value="${newMissTask}" oninput="newMissTask = this.value" class="w-full px-3 py-1.5 text-xs rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]" />
-              </div>
-              <div>
-                <label class="block text-xs text-[var(--muted-foreground)] mb-1">Which letter caused it?</label>
-                <div class="grid grid-cols-4 gap-1">
-                  ${['V', 'I', 'C', 'T'].map(l => `
-                    <button onclick="setNewMissTag('${l}')" class="py-1.5 rounded-lg text-xs font-bold border ${newMissTag === l ? 'bg-[var(--primary)] text-[var(--primary-foreground)] border-[var(--primary)]' : 'bg-[var(--card)] text-[var(--foreground)] border-[var(--border)]'}">[${l}]</button>
-                  `).join('')}
-                </div>
-              </div>
-            </div>
-            <div class="text-xs text-[var(--muted-foreground)] italic">${tagHints[newMissTag]}</div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input type="text" placeholder="What went wrong? (symptom)" value="${newMissSymptom}" oninput="newMissSymptom = this.value" class="w-full px-3 py-1.5 text-xs rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]" />
-              <div class="flex gap-2">
-                <input type="text" placeholder="What did/will we change in the folder?" value="${newMissUpgrade}" oninput="newMissUpgrade = this.value" class="w-full px-3 py-1.5 text-xs rounded-lg bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]" />
-                <button onclick="addMiss()" class="px-3 py-1.5 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold shrink-0">Add</button>
-              </div>
-            </div>
-          </div>
-        </div>
+## 2. Friction & Loop Summary (\`[I]\`, \`[C]\`, \`[T]\`, \`[V]\`)
+- **Misses Logged (${data.misses.length}):**
+${data.misses.map(missLine).join('\n') || '  - None logged this week.'}
+- **Dominant Bottleneck Letter:** ${dominant ? `\`[${dominant}]\`` : 'None'}
 
-        <!-- Choose Next Week's Single Step -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 class="text-base font-semibold text-[var(--foreground)]">Select Next Week's Single Step</h2>
-              <p class="text-xs text-[var(--muted-foreground)]">Keep it small: change one variable at a time and keep earlier checks running.</p>
-            </div>
-            <button onclick="saveWeeklyCheckinFile()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold hover:opacity-90 transition-opacity">
-              ${copiedReport ? `✓ Saved ${data.weekLabel}.md!` : `Save ${data.weekLabel}.md to Folder`}
-            </button>
-          </div>
+## 3. Trust Calibration Snapshot
+- **How I Checked Results:** ${answer('review').label}
+- **When a Result Missed:** ${answer('onMiss').label}
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-            ${data.nextWeekCandidates.map(c => {
-              const active = c.id === selectedNextId;
-              return `
-                <div onclick="selectNext('${c.id}')" class="cursor-pointer p-4 rounded-xl border transition-all ${active ? 'border-2 border-[var(--primary)] bg-[var(--secondary)]' : 'border-[var(--border)] bg-[var(--background)]'}">
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">[${c.letter}]</span>
-                    ${active ? `<span class="text-xs font-semibold text-[var(--primary)]">Selected for Next Week</span>` : ''}
-                  </div>
-                  <div class="text-sm font-semibold mt-2 text-[var(--foreground)]">${c.title}</div>
-                  <p class="text-xs text-[var(--muted-foreground)] mt-1">${c.description}</p>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `;
+## 4. Next Week's Single Step
+- **One Practice to Try Next Week (\`[${oneLine(next.letter)}]\`):** ${oneLine(next.title)}. ${oneLine(next.description)}
+- **Target Task:** ${oneLine(state.nextTask) || '[Specific task on next week\'s calendar]'}
+${fresh.length ? `
+## 5. To Append to \`misses-ledger.md\`
+These misses were added during this check-in and are not in the ledger yet.
+
+${fresh.map(m => `### ${oneLine(m.date)} — ${oneLine(m.task)} — Tagged: ${tags(m)}
+- **What went wrong:** ${oneLine(m.symptom)}
+- **System upgrade applied:** ${oneLine(m.upgrade)}
+- **New check so it is caught next time:** ${oneLine(m.check) || '[Write one before closing this miss.]'}`).join('\n\n')}
+` : ''}`;
     }
 
-    window.setFilter = function(l) { filterLetter = l; render(); };
-    window.setCommitmentStatus = function(v) { commitmentStatus = v; render(); };
-    window.setReviewBehavior = function(v) { reviewBehavior = v; render(); };
-    window.setMissBehavior = function(v) { missBehavior = v; render(); };
-    window.setNewMissTag = function(l) { newMissTag = l; render(); };
-    window.selectNext = function(id) { selectedNextId = id; render(); };
+    function buildActiveFocusMarkdown() {
+      const next = nextChoice();
+      return `# Active Coaching Focus
 
-    window.addMiss = function() {
-      if (!newMissTask.trim() && !newMissSymptom.trim()) return;
-      data.misses.unshift({
-        date: data.date,
-        task: newMissTask.trim() || 'Untagged Task',
-        tags: [newMissTag],
-        symptom: newMissSymptom.trim() || 'Output required manual rework.',
-        upgrade: newMissUpgrade.trim() || `Added [${newMissTag}] rule to handover/folder.`
-      });
-      newMissTask = '';
-      newMissSymptom = '';
-      newMissUpgrade = '';
-      render();
+*Updated: ${oneLine(data.date)}*
+
+## Current Blocker
+- **How It Shows Up in My Work:** ${dominantLetter() ? `Most misses in ${oneLine(data.weekLabel)} traced back to \`[${dominantLetter()}]\`.` : '[Describe the friction you feel most.]'}
+- **Primary ICTV Pillar Involved:** \`[${dominantLetter() || oneLine(next.letter)}]\`
+
+## This Week's Practice Experiment
+- **The One Thing I'm Trying:** ${oneLine(next.title)} \`[${oneLine(next.letter)}]\`
+- **Real Task to Test It On:** ${oneLine(state.nextTask) || '[Name one real task this week]'}
+- **How We Know It Worked:** ${oneLine(next.successMetric) || oneLine(next.description)}
+
+## Next Check-in
+- **Scheduled For:** [Day / Time]
+`;
+    }
+
+    const FILES = {
+      checkin: { name: checkinFile, build: buildCheckinMarkdown, folder: 'ictv-coach/check-ins/' },
+      focus: { name: () => 'active-focus.md', build: buildActiveFocusMarkdown, folder: 'ictv-coach/' }
     };
 
-    window.saveWeeklyCheckinFile = async function() {
-      const nextChoice = data.nextWeekCandidates.find(c => c.id === selectedNextId) || data.nextWeekCandidates[0];
-      const md = `# Weekly ICTV Check-in: ${data.weekLabel}\n\n*Date:* ${data.date}\n\n## 1. Practice Review\n- **Last Week's Focus:** ${data.committedPractice}\n- **Outcome:** ${commitmentStatus}\n\n## 2. Friction & Loop Summary\n- **Misses Logged (${data.misses.length}):**\n${data.misses.map(m => `  - **${m.task}** (${m.tags.map(t => `\`[${t}]\``).join(', ')}): ${m.symptom} → *Upgrade:* ${m.upgrade}`).join('\n')}\n\n## 3. Trust Calibration Snapshot\n- **Verification Habit:** ${reviewBehavior}\n- **Response to Misses:** ${missBehavior}\n\n## 4. Next Week's Single Step\n- **Selected Practice (\`[${nextChoice.letter}]\`):** ${nextChoice.title} — ${nextChoice.description}\n`;
-      const filename = `${data.weekLabel}.md`;
-
-      if (window.showSaveFilePicker) {
-        try {
-          const handle = await window.showSaveFilePicker({
-            suggestedName: filename,
-            types: [{ description: 'Markdown File', accept: { 'text/markdown': ['.md'] } }]
-          });
-          const writable = await handle.createWritable();
-          await writable.write(md);
-          await writable.close();
-          copiedReport = true;
-          render();
-          return;
-        } catch (err) {}
+    const actions = {
+      setFilter(letter) { state.filter = letter; },
+      answerCommitment(id) { state.commitment = id; },
+      answerReview(id) { state.review = id; },
+      answerOnMiss(id) { state.onMiss = id; },
+      selectNext(id) { state.nextId = id; },
+      setNextTask(value) { state.nextTask = value; },
+      toggleDraftTag(letter) {
+        const list = state.draft.tags;
+        if (list.includes(letter)) { if (list.length > 1) list.splice(list.indexOf(letter), 1); }
+        else list.push(letter);
+      },
+      setDraftTask(value) { state.draft.task = value; },
+      setDraftSymptom(value) { state.draft.symptom = value; },
+      setDraftUpgrade(value) { state.draft.upgrade = value; },
+      setDraftCheck(value) { state.draft.check = value; },
+      addMiss() {
+        const d = state.draft;
+        if (!d.task.trim() || !d.symptom.trim()) return;
+        data.misses.unshift({
+          date: data.date,
+          task: d.task.trim(),
+          tags: ['V', 'I', 'C', 'T'].filter(l => d.tags.includes(l)),
+          symptom: d.symptom.trim(),
+          upgrade: d.upgrade.trim() || '[Not decided yet. Change the setup before the next run.]',
+          check: d.check.trim(),
+          isNew: true
+        });
+        state.draft = { task: '', tags: ['V'], symptom: '', upgrade: '', check: '' };
+        state.filter = 'ALL';
+      },
+      togglePreview(which) { state.preview = state.preview === which ? '' : which; },
+      async save(which) {
+        const file = FILES[which];
+        const result = await ICTV.saveTextFile(file.name(), file.build());
+        if (result === 'cancelled') return;
+        state.saveResult = result;
+        state.savedFile = which;
+        if (result !== 'saved') state.preview = which;
       }
-
-      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      copiedReport = true;
-      render();
     };
+    const ANSWER_ACTION = { commitment: 'answerCommitment', review: 'answerReview', onMiss: 'answerOnMiss' };
 
-    render();
+    const previewView = () => (state.preview ? esc(FILES[state.preview].build()) : '');
+
+    function view() {
+      const shown = state.filter === 'ALL' ? data.misses : data.misses.filter(m => m.tags.includes(state.filter));
+      const draftHint = state.draft.tags.map(l => `${l}: ${ICTV.LETTERS[l].hint}`).join(' ');
+      return `
+        <header class="card">
+          <div class="row">
+            <div class="stack" style="gap: 4px">
+              <span class="eyebrow">ICTV Coach · Weekly check-in</span>
+              <h1>Week ${esc(data.weekLabel)}</h1>
+              <p class="muted">Practice you committed to: <span class="strong" style="color: var(--ictv-text)">${esc(data.committedPractice)}</span></p>
+            </div>
+            <span class="tag">${esc(data.date)}</span>
+          </div>
+          <div class="grid three">
+            ${QUESTIONS.map(q => `
+              <div class="panel">
+                <span class="eyebrow quiet">${q.title}</span>
+                ${q.options.map(o => `
+                  <button class="choice slim" aria-pressed="${state[q.key] === o.id}" data-action="${ANSWER_ACTION[q.key]}" data-arg="${o.id}" data-key="${q.key}-${o.id}">${o.label}</button>`).join('')}
+                ${answer(q.key).note ? `<span class="small warn">${answer(q.key).note}</span>` : ''}
+              </div>`).join('')}
+          </div>
+        </header>
+
+        <section class="card">
+          <div class="row">
+            <div>
+              <h2>Misses this week</h2>
+              <p class="muted small">Each miss is tagged to the letter that let it through, and ends with a change to your setup.</p>
+            </div>
+            <div class="row start" style="gap: 6px">
+              ${['ALL', 'V', 'I', 'C', 'T'].map(l => `
+                <button class="btn small ${state.filter === l ? 'primary' : ''}" aria-pressed="${state.filter === l}" data-action="setFilter" data-arg="${l}" data-key="filter-${l}">${l === 'ALL' ? `All ${data.misses.length}` : `${l} ${count(l)}`}</button>`).join('')}
+            </div>
+          </div>
+          ${dominantLetter() ? `<p class="small">Most misses trace back to <strong>${dominantLetter()} · ${ICTV.LETTERS[dominantLetter()].name}</strong>.</p>` : ''}
+          <div class="stack">
+            ${shown.length ? shown.map(m => `
+              <div class="panel">
+                <div class="row">
+                  <span class="strong">${esc(m.task)}</span>
+                  <span class="row start" style="gap: 6px">${m.tags.map(t => `<span class="tag on">${esc(t)}</span>`).join('')}${m.isNew ? '<span class="tag">new</span>' : ''}<span class="muted small">${esc(m.date)}</span></span>
+                </div>
+                <p class="small"><span class="strong">What went wrong:</span> ${esc(m.symptom)}</p>
+                <p class="small"><span class="strong">What changed in the setup:</span> ${esc(m.upgrade)}</p>
+                ${m.check ? `<p class="small"><span class="strong">New check:</span> ${esc(m.check)}</p>` : ''}
+              </div>`).join('') : `<p class="panel muted small">${state.filter === 'ALL' ? 'No misses logged this week. If a result needed rework, log it below.' : `No misses tagged ${state.filter} this week.`}</p>`}
+          </div>
+          <div class="panel plain">
+            <span class="eyebrow">Log another miss from this week</span>
+            <div class="row end">
+              <label class="field grow">Task where the result fell short
+                <input data-key="d-task" data-input="setDraftTask" value="${esc(state.draft.task)}" placeholder="e.g. Client proposal summary" />
+              </label>
+              <div class="field">Which letter let it through?
+                <div class="row start" style="gap: 6px">
+                  ${['V', 'I', 'C', 'T'].map(l => `<button class="btn small ${state.draft.tags.includes(l) ? 'primary' : ''}" aria-pressed="${state.draft.tags.includes(l)}" title="${esc(ICTV.LETTERS[l].name)}" data-action="toggleDraftTag" data-arg="${l}" data-key="d-tag-${l}">${l}</button>`).join('')}
+                </div>
+              </div>
+            </div>
+            <p class="muted small">${esc(draftHint)}</p>
+            <div class="grid three">
+              <label class="field">What went wrong?
+                <input data-key="d-symptom" data-input="setDraftSymptom" value="${esc(state.draft.symptom)}" />
+              </label>
+              <label class="field">What changes in the setup?
+                <input data-key="d-upgrade" data-input="setDraftUpgrade" value="${esc(state.draft.upgrade)}" />
+              </label>
+              <label class="field">New check so it is caught next time
+                <input data-key="d-check" data-input="setDraftCheck" data-enter="addMiss" value="${esc(state.draft.check)}" />
+              </label>
+            </div>
+            <div class="row"><span class="muted small">A task and what went wrong are required.</span><button class="btn" data-action="addMiss" data-key="d-add">Add miss</button></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div>
+            <h2>Next week's single step</h2>
+            <p class="muted small">Change one thing at a time, and keep the earlier checks running.</p>
+          </div>
+          <div class="grid three">
+            ${data.nextWeekCandidates.map(c => `
+              <button class="choice" aria-pressed="${c.id === state.nextId}" data-action="selectNext" data-arg="${esc(c.id)}" data-key="next-${esc(c.id)}">
+                <span class="row"><span class="tag">${esc(c.letter)}</span>${c.id === state.nextId ? '<span class="tag on">Selected</span>' : ''}</span>
+                <span class="strong">${esc(c.title)}</span>
+                <span class="muted small">${esc(c.description)}</span>
+              </button>`).join('')}
+          </div>
+          <div class="row end">
+            <label class="field grow">Real task next week to test it on
+              <input data-key="next-task" data-input="setNextTask" value="${esc(state.nextTask)}" />
+            </label>
+          </div>
+          <div class="row">
+            <div class="row start">
+              <button class="btn" data-action="togglePreview" data-arg="checkin" data-key="pv-checkin">${state.preview === 'checkin' ? 'Hide' : 'Preview'} ${esc(checkinFile())}</button>
+              <button class="btn" data-action="togglePreview" data-arg="focus" data-key="pv-focus">${state.preview === 'focus' ? 'Hide' : 'Preview'} active-focus.md</button>
+            </div>
+            <div class="row start">
+              <button class="btn primary" data-action="save" data-arg="checkin" data-key="save-checkin">Save ${esc(checkinFile())}</button>
+              <button class="btn primary" data-action="save" data-arg="focus" data-key="save-focus">Save active-focus.md</button>
+            </div>
+          </div>
+          ${state.saveResult ? `<div class="panel key small" role="status"><span>${ICTV.saveMessage(state.saveResult, FILES[state.savedFile].name(), FILES[state.savedFile].folder)}</span></div>` : ''}
+          ${state.preview ? `<pre class="filepreview" data-live="preview">${previewView()}</pre>` : ''}
+        </section>`;
+    }
+
+    const page = { data, state, actions, view, buildCheckinMarkdown, buildActiveFocusMarkdown };
+    window.ICTV_PAGE = page;
+    ICTV.mount(document.getElementById('app'), view, actions, { preview: previewView });
   </script>
 </body>
 </html>

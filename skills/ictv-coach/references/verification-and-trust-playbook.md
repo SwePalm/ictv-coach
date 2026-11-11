@@ -68,4 +68,4 @@ Instead, walk the user through a 60-second **Miss Tagging Loop**:
 | **`[T]` Tools** | *Did the agent guess something a tool or script should have looked up or calculated?* | Connect the read-only source, or build a small deterministic check/script. |
 
 ### Golden Rule of Loop Tuning
-**Change one thing at a time, and keep earlier checks in place.** That way, your verification list grows from real failures you actually experienced—not a speculative 50-item checklist invented in advance.
+**Change one thing at a time, and keep earlier checks in place.** And **every miss ends with a check**: even when the root cause was `[I]`, `[C]`, or `[T]`, add or tighten one check so the same flaw is caught before a human reads the next result. That way, your verification list grows from real failures you actually experienced—not a speculative 50-item checklist invented in advance.

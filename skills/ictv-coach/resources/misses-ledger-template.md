@@ -1,6 +1,6 @@
 # ICTV Misses Ledger (The Loop Engine)
 
-Every time an AI output disappoints, resist the urge to just manually edit the text and move on. Log a 3-line entry here so the failure upgrades your system (`I`, `C`, `T`, or `V`) permanently.
+Every time an AI output disappoints, resist the urge to just manually edit the text and move on. Log a short entry here so the failure upgrades your system (`I`, `C`, `T`, or `V`) permanently.
 
 *Tag key:*
 - **`[V]` Verification:** We didn't have a check for this, or the check didn't run before human review.
@@ -15,4 +15,5 @@ Every time an AI output disappoints, resist the urge to just manually edit the t
 ### YYYY-MM-DD — [Task Name] — Tagged: `[V]` + `[C]`
 - **What went wrong:** [e.g., Draft used generic consulting buzzwords and assumed the wrong target buyer.]
 - **Why it slipped through:** [e.g., Target buyer profile wasn't in the folder (`[C]`), and there was no check banning buzzwords (`[V]`).]
-- **System upgrade applied:** [e.g., Added buyer profile to `profile.md` and added Check V3 ("Zero banned buzzwords") to the task handover.]
+- **System upgrade applied:** [e.g., Added buyer profile to `profile.md`.]
+- **New check so it is caught next time:** [e.g., Added Check V3 ("Zero banned buzzwords") and Check V4 ("Names the buyer from `profile.md`") to the task handover.]

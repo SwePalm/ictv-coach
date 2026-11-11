@@ -3,11 +3,113 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ICTV Coaching Assessment & Loop Diagnostic</title>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <title>ICTV Coaching Assessment</title>
+  <!-- Self-contained on purpose: no external scripts, styles or fonts, so the page opens anywhere. -->
+  <style>
+/* ictv-shared:css:start */
+/* Shared look for every ICTV Coach page. Edit here, then run: node tools/check.mjs --fix
+   Colours fall back to the host app's theme variables when the page is shown inside one. */
+:root {
+  color-scheme: light dark;
+  --ictv-bg: var(--background, #f5f6f8);
+  --ictv-surface: var(--card, #ffffff);
+  --ictv-sunken: var(--secondary, #eef1f5);
+  --ictv-line: var(--border, #d9dee7);
+  --ictv-text: var(--foreground, #131a26);
+  --ictv-muted: var(--muted-foreground, #545f71);
+  --ictv-accent: var(--primary, #0a66c2);
+  --ictv-on-accent: var(--primary-foreground, #ffffff);
+  --ictv-warn: #b45309;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ictv-bg: var(--background, #0c1118);
+    --ictv-surface: var(--card, #151c27);
+    --ictv-sunken: var(--secondary, #1c2533);
+    --ictv-line: var(--border, #2b3647);
+    --ictv-text: var(--foreground, #eef2f7);
+    --ictv-muted: var(--muted-foreground, #9aa6b8);
+    --ictv-accent: var(--primary, #5cb3ff);
+    --ictv-on-accent: var(--primary-foreground, #08111c);
+    --ictv-warn: #f5b041;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px 16px 48px;
+  background: var(--ictv-bg);
+  color: var(--ictv-text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+#app { max-width: 880px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2, h3, p, ul { margin: 0; }
+h1 { font-size: 22px; line-height: 1.25; }
+h2 { font-size: 16px; }
+h3 { font-size: 14px; }
+ul { padding-left: 18px; }
+code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ictv-accent); outline-offset: 2px; }
+
+.card { background: var(--ictv-surface); border: 1px solid var(--ictv-line); border-radius: 14px; padding: 22px; display: grid; gap: 14px; }
+.panel { background: var(--ictv-sunken); border: 1px solid var(--ictv-line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.panel.plain { background: var(--ictv-surface); }
+.panel.key { border: 2px solid var(--ictv-accent); }
+.row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.row.start { justify-content: flex-start; }
+.row.end { align-items: flex-end; }
+.stack { display: grid; gap: 10px; align-content: start; }
+.grow { flex: 1 1 220px; min-width: 0; }
+.grid { display: grid; gap: 12px; }
+@media (min-width: 720px) {
+  .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 719px) { .grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ictv-accent); }
+.eyebrow.quiet { color: var(--ictv-muted); }
+.muted { color: var(--ictv-muted); }
+.small { font-size: 13px; }
+.strong { font-weight: 600; }
+.warn { color: var(--ictv-warn); }
+.struck { text-decoration: line-through; color: var(--ictv-muted); }
+.pre { white-space: pre-line; }
+
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--ictv-line); background: var(--ictv-surface); white-space: nowrap; }
+.tag.on { background: var(--ictv-accent); border-color: var(--ictv-accent); color: var(--ictv-on-accent); }
+
+.btn { border: 1px solid var(--ictv-line); background: var(--ictv-sunken); border-radius: 9px; padding: 8px 14px; font-size: 13px; font-weight: 600; }
+.btn:hover { border-color: var(--ictv-accent); }
+.btn.primary { background: var(--ictv-accent); border-color: var(--ictv-accent); color: var(--ictv-on-accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.link { border: 0; background: none; padding: 0; color: var(--ictv-accent); text-decoration: underline; font-weight: 500; }
+.btn.small { padding: 5px 10px; }
+
+.choice { display: grid; gap: 6px; align-content: start; width: 100%; text-align: left; background: var(--ictv-bg); border: 1px solid var(--ictv-line); border-radius: 12px; padding: 14px; }
+.choice:hover { border-color: var(--ictv-accent); }
+.choice[aria-pressed="true"] { background: var(--ictv-sunken); border-color: var(--ictv-accent); box-shadow: inset 0 0 0 1px var(--ictv-accent); }
+.choice.slim { padding: 8px 12px; border-radius: 9px; font-size: 13px; font-weight: 500; }
+.choice.slim[aria-pressed="true"] { background: var(--ictv-accent); color: var(--ictv-on-accent); }
+
+.field { display: grid; gap: 4px; font-size: 12.5px; color: var(--ictv-muted); }
+.field input, .field select, .field textarea { width: 100%; background: var(--ictv-bg); color: var(--ictv-text); border: 1px solid var(--ictv-line); border-radius: 9px; padding: 8px 10px; font-size: 14px; }
+.field textarea { resize: vertical; min-height: 64px; line-height: 1.4; }
+.sample { background: var(--ictv-surface); border: 1px solid var(--ictv-line); border-radius: 8px; padding: 10px; white-space: pre-line; }
+.filepreview { margin: 0; background: var(--ictv-bg); border: 1px solid var(--ictv-line); border-radius: 10px; padding: 14px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 460px; overflow: auto; }
+.checks { list-style: none; padding: 0; display: grid; gap: 6px; font-size: 13.5px; }
+.checks li { display: grid; grid-template-columns: 20px 1fr; gap: 6px; }
+@media print { .btn, .noprint { display: none; } body { background: #fff; } }
+/* ictv-shared:css:end */
+  </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-6">
-  <!-- Data Payload: Coach populates this JSON object with the user's real audit findings -->
+<body>
+  <!-- Data payload. The coach fills this JSON with the person's real audit findings. Optional key: nextCheckin.
+       Write plain text only (the page escapes it), keep it valid JSON, and never include a closing script tag. -->
   <script id="ictv-assessment-data" type="application/json">
   {
     "userName": "Practitioner",
@@ -81,228 +183,253 @@
   }
   </script>
 
-  <div class="max-w-4xl mx-auto space-y-6" id="app"></div>
+  <main id="app"></main>
 
   <script>
-    // Ensure clean theme variables when opened standalone in a standard browser outside Antigravity
-    (function ensureStandaloneTheme() {
-      const root = document.documentElement;
-      const computed = getComputedStyle(root).getPropertyValue('--card').trim();
-      if (!computed) {
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const vars = prefersDark ? {
-          '--background': '#0b0f17',
-          '--card': '#131b2e',
-          '--content': '#182238',
-          '--border': '#26324d',
-          '--foreground': '#f1f5f9',
-          '--muted-foreground': '#94a3b8',
-          '--primary': '#38bdf8',
-          '--primary-foreground': '#090d16',
-          '--secondary': '#1e293b',
-          '--secondary-foreground': '#e2e8f0',
-          '--accent': '#1e293b'
-        } : {
-          '--background': '#f8fafc',
-          '--card': '#ffffff',
-          '--content': '#f1f5f9',
-          '--border': '#e2e8f0',
-          '--foreground': '#0f172a',
-          '--muted-foreground': '#475569',
-          '--primary': '#0284c7',
-          '--primary-foreground': '#ffffff',
-          '--secondary': '#f1f5f9',
-          '--secondary-foreground': '#0f172a',
-          '--accent': '#e2e8f0'
-        };
-        Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+/* ictv-shared:js:start */
+// Shared helpers for every ICTV Coach page. Edit here, then run: node tools/check.mjs --fix
+const ICTV = (() => {
+  const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+  // Everything from the data payload or typed by the person goes through esc() before it becomes HTML.
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ESCAPES[ch]);
+
+  // Keeps a value on one line so it cannot break the structure of a saved Markdown file.
+  const oneLine = value => String(value ?? '').replace(/\s*\n\s*/g, ' ').trim();
+
+  const readPayload = id => JSON.parse(document.getElementById(id).textContent);
+
+  // Returns 'saved' (written where the person chose), 'downloaded' (sent to the Downloads folder),
+  // 'cancelled' (the person closed the dialog) or 'blocked' (this viewer allows neither).
+  async function saveTextFile(filename, text) {
+    if (typeof window.showSaveFilePicker === 'function') {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{ description: 'Markdown file', accept: { 'text/markdown': ['.md'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(text);
+        await writable.close();
+        return 'saved';
+      } catch (err) {
+        if (err && err.name === 'AbortError') return 'cancelled';
+        // Embedded viewers refuse the dialog. Fall through to a plain download.
       }
-    })();
+    }
+    try {
+      const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return 'downloaded';
+    } catch (err) {
+      return 'blocked';
+    }
+  }
 
-    const data = JSON.parse(document.getElementById('ictv-assessment-data').textContent);
-    let selectedPillar = data.primaryBlockerLetter || 'V';
-    let selectedExpId = (data.experimentOptions.find(e => e.recommended) || data.experimentOptions[0]).id;
-    let customTaskNote = '';
-    let copiedState = false;
+  function saveMessage(result, filename, folder) {
+    const name = `<strong>${esc(filename)}</strong>`;
+    const where = `<code>${esc(folder)}</code>`;
+    if (result === 'saved') return `Saved ${name}. Keep it in ${where} so your assistant reads it next time.`;
+    if (result === 'downloaded') return `${name} was sent to your downloads. Move it to ${where}. If no file appeared, the full text is below: select it and save it under that name.`;
+    if (result === 'blocked') return `This viewer does not allow saving files. The full text of ${name} is below: select it and save it in ${where}.`;
+    return '';
+  }
 
+  // Draws view() into root and redraws after every action. Buttons carry data-action (and an optional
+  // data-arg); fields carry data-input. Typing updates state without a full redraw, so the cursor never
+  // jumps; only regions marked data-live="name" are refreshed, from live[name](). data-key lets keyboard
+  // focus survive a redraw.
+  function mount(root, view, actions, live = {}) {
     function render() {
-      const app = document.getElementById('app');
-      const activePillar = data.pillars[selectedPillar];
-      const selectedExp = data.experimentOptions.find(e => e.id === selectedExpId) || data.experimentOptions[0];
+      const active = document.activeElement;
+      const key = active && active.getAttribute ? active.getAttribute('data-key') : null;
+      root.innerHTML = view();
+      if (!key) return;
+      for (const el of root.querySelectorAll('[data-key]')) {
+        if (el.getAttribute('data-key') === key) { el.focus(); break; }
+      }
+    }
+    root.addEventListener('click', event => {
+      const el = event.target.closest ? event.target.closest('[data-action]') : null;
+      if (!el || !root.contains(el)) return;
+      const action = actions[el.getAttribute('data-action')];
+      if (action) Promise.resolve(action(el.getAttribute('data-arg'))).then(render);
+    });
+    root.addEventListener('input', event => {
+      const el = event.target;
+      const name = el && el.getAttribute ? el.getAttribute('data-input') : null;
+      if (!name || !actions[name]) return;
+      actions[name](el.value);
+      for (const region of root.querySelectorAll('[data-live]')) {
+        const draw = live[region.getAttribute('data-live')];
+        if (draw) region.innerHTML = draw();
+      }
+    });
+    root.addEventListener('keydown', event => {
+      const el = event.target;
+      const name = event.key === 'Enter' && el && el.getAttribute ? el.getAttribute('data-enter') : null;
+      if (name && actions[name]) { event.preventDefault(); Promise.resolve(actions[name]()).then(render); }
+    });
+    render();
+    return render;
+  }
 
-      app.innerHTML = `
-        <!-- Header Card -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
-            <div>
-              <div class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">ICTV Coach · Evidence-Based Assessment</div>
-              <h1 class="text-xl font-bold mt-1 text-[var(--foreground)]">${data.userName} — Working Diagnosis</h1>
-              <p class="text-sm text-[var(--muted-foreground)] mt-0.5">${data.roleSummary}</p>
-            </div>
-            <div class="text-xs px-3 py-1.5 rounded-lg bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)]">
-              Assessed: <span class="font-medium">${data.date}</span>
-            </div>
-          </div>
+  const LETTERS = {
+    V: { name: 'Verification', hint: 'A flaw got through because no written-down check would have caught it.' },
+    I: { name: 'Instructions', hint: 'The goal or a "not acceptable" boundary was unstated or vague.' },
+    C: { name: 'Context', hint: 'The assistant had to guess background, audience or examples that live in your head.' },
+    T: { name: 'Tools', hint: 'The assistant guessed something it should have looked up or calculated, or it had the wrong access.' }
+  };
 
-          <!-- Mirror: Strengths & #1 Blocker -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-            <div class="p-4 rounded-lg bg-[var(--secondary)] border border-[var(--border)]">
-              <div class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">What Already Works Well</div>
-              <ul class="mt-2.5 space-y-2 text-sm text-[var(--foreground)]">
-                ${data.strengths.map(s => `<li class="flex items-start gap-2"><span class="text-[var(--primary)] font-bold">✓</span><span>${s}</span></li>`).join('')}
-              </ul>
-            </div>
+  return { esc, oneLine, readPayload, saveTextFile, saveMessage, mount, LETTERS };
+})();
+/* ictv-shared:js:end */
 
-            <div class="p-4 rounded-lg bg-[var(--secondary)] border-2 border-[var(--primary)]">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">#1 Active Bottleneck · [${data.primaryBlockerLetter}]</span>
-                <span class="text-xs px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold">Start Here</span>
-              </div>
-              <p class="mt-2 text-sm font-medium text-[var(--foreground)]">${data.primaryBlockerHeadline}</p>
-              <p class="mt-2 text-xs text-[var(--muted-foreground)]">Remember: Verification (V) is not the final step of a pipeline—it is the lever that exposes what Instructions (I), Context (C), or Tools (T) need next.</p>
-            </div>
-          </div>
-        </div>
+    const data = ICTV.readPayload('ictv-assessment-data');
+    const { esc, oneLine } = ICTV;
+    const recommended = data.experimentOptions.find(e => e.recommended) || data.experimentOptions[0];
+    const state = {
+      pillar: data.primaryBlockerLetter || 'V',
+      experimentId: recommended.id,
+      task: recommended.task || '',
+      checkin: data.nextCheckin || '',
+      preview: false,
+      saveResult: ''
+    };
+    const FILENAME = 'active-focus.md';
+    const experiment = () => data.experimentOptions.find(e => e.id === state.experimentId) || data.experimentOptions[0];
 
-        <!-- Interactive ICTV Loop Diagnostic -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <div>
-              <h2 class="text-base font-semibold text-[var(--foreground)]">Interactive ICTV Loop Diagnostic</h2>
-              <p class="text-xs text-[var(--muted-foreground)]">Click any letter in the loop to inspect your audit evidence and how that pillar connects.</p>
-            </div>
-            <span class="text-xs text-[var(--muted-foreground)]">V pulls I, C, and T up ↻</span>
-          </div>
+    function buildActiveFocusMarkdown() {
+      const exp = experiment();
+      return `# Active Coaching Focus
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            ${['V', 'I', 'C', 'T'].map(letter => {
-              const p = data.pillars[letter];
-              const isSelected = selectedPillar === letter;
-              const isPrimary = data.primaryBlockerLetter === letter;
-              return `
-                <button onclick="selectPillar('${letter}')" class="text-left p-3.5 rounded-xl border transition-all ${isSelected ? 'border-2 border-[var(--primary)] bg-[var(--secondary)] shadow-sm' : 'border-[var(--border)] bg-[var(--background)] opacity-85 hover:opacity-100'}">
-                  <div class="flex items-center justify-between">
-                    <span class="text-lg font-bold text-[var(--foreground)]">${letter}</span>
-                    <span class="text-xs px-2 py-0.5 rounded-full ${isPrimary ? 'bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold' : 'bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)]'}">${p.tag}</span>
-                  </div>
-                  <div class="text-sm font-medium mt-1 text-[var(--foreground)]">${p.name}</div>
-                </button>
-              `;
-            }).join('')}
-          </div>
+*Updated: ${oneLine(data.date)}*
 
-          <!-- Selected Pillar Detail Panel -->
-          <div class="mt-4 p-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <div class="text-sm font-semibold text-[var(--foreground)]">
-                [${selectedPillar}] ${activePillar.name} — <span class="font-normal text-[var(--muted-foreground)] italic">"${activePillar.question}"</span>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-              <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
-                <div class="text-xs font-semibold uppercase text-[var(--muted-foreground)]">Observed in Your Workflow</div>
-                <p class="text-sm mt-1 text-[var(--foreground)]">${activePillar.observedSignal}</p>
-              </div>
-              <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
-                <div class="text-xs font-semibold uppercase text-[var(--primary)]">ICTV Loop Practice</div>
-                <p class="text-sm mt-1 text-[var(--foreground)]">${activePillar.intervention}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+## Current Blocker
+- **How It Shows Up in My Work:** ${oneLine(data.primaryBlockerHeadline)}
+- **Primary ICTV Pillar Involved:** \`[${oneLine(data.primaryBlockerLetter)}]\`
 
-        <!-- Choose This Week's Single Practice Experiment -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
-          <h2 class="text-base font-semibold text-[var(--foreground)]">Commit to One Practice This Week</h2>
-          <p class="text-xs text-[var(--muted-foreground)] mt-0.5">"Start with less than you think you need." Pick one small intervention to test on a real task this week.</p>
+## This Week's Practice Experiment
+- **The One Thing I'm Trying:** ${oneLine(exp.title)} \`[${oneLine(exp.letter)}]\`
+- **Real Task to Test It On:** ${oneLine(state.task) || oneLine(exp.task)}
+- **How We Know It Worked:** ${oneLine(exp.successMetric)}
 
-          <div class="space-y-3 mt-4">
-            ${data.experimentOptions.map(exp => {
-              const active = exp.id === selectedExpId;
-              return `
-                <div onclick="selectExperiment('${exp.id}')" class="cursor-pointer p-4 rounded-xl border transition-all ${active ? 'border-2 border-[var(--primary)] bg-[var(--secondary)]' : 'border-[var(--border)] bg-[var(--background)] hover:opacity-95'}">
-                  <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                      <span class="text-xs font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">[${exp.letter}]</span>
-                      <span class="text-sm font-semibold text-[var(--foreground)]">${exp.title}</span>
-                    </div>
-                    ${exp.recommended ? `<span class="text-xs px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold">Recommended</span>` : ''}
-                  </div>
-                  <p class="text-xs text-[var(--muted-foreground)] mt-1.5">${exp.whyItWorks}</p>
-                  <div class="mt-2 text-xs text-[var(--foreground)]"><span class="font-semibold">How we know it worked:</span> ${exp.successMetric}</div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-
-          <div class="mt-4 pt-4 border-t border-[var(--border)] flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4">
-            <div class="flex-1">
-              <label class="block text-xs font-semibold text-[var(--muted-foreground)] mb-1">Real task on my desk to test this on (optional customization):</label>
-              <input
-                type="text"
-                value="${customTaskNote || selectedExp.task}"
-                oninput="updateTaskNote(this.value)"
-                class="w-full px-3 py-2 text-sm rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] focus:outline-none focus:border-[var(--primary)]"
-              />
-            </div>
-            <button onclick="saveActiveFocusFile()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-semibold hover:opacity-90 transition-opacity shrink-0">
-              ${copiedState ? '✓ Saved active-focus.md!' : 'Save active-focus.md'}
-            </button>
-          </div>
-        </div>
-      `;
+## Next Check-in
+- **Scheduled For:** ${oneLine(state.checkin) || '[Day / Time]'}
+`;
     }
 
-    window.selectPillar = function(letter) {
-      selectedPillar = letter;
-      render();
-    };
-
-    window.selectExperiment = function(id) {
-      selectedExpId = id;
-      customTaskNote = '';
-      render();
-    };
-
-    window.updateTaskNote = function(val) {
-      customTaskNote = val;
-    };
-
-    window.saveActiveFocusFile = async function() {
-      const exp = data.experimentOptions.find(e => e.id === selectedExpId) || data.experimentOptions[0];
-      const taskText = customTaskNote || exp.task;
-      const md = `# Active Coaching Focus\n\n*Updated: ${data.date}*\n\n## Current Blocker\n- **How It Shows Up in My Work:** ${data.primaryBlockerHeadline}\n- **Primary ICTV Pillar Involved:** \`[${exp.letter}]\`\n\n## This Week's Practice Experiment\n- **The One Thing I'm Trying:** ${exp.title}\n- **Real Task to Test It On:** ${taskText}\n- **How We Know It Worked:** ${exp.successMetric}\n`;
-      const filename = 'active-focus.md';
-
-      if (window.showSaveFilePicker) {
-        try {
-          const handle = await window.showSaveFilePicker({
-            suggestedName: filename,
-            types: [{ description: 'Markdown File', accept: { 'text/markdown': ['.md'] } }]
-          });
-          const writable = await handle.createWritable();
-          await writable.write(md);
-          await writable.close();
-          copiedState = true;
-          render();
-          return;
-        } catch (err) {}
+    const actions = {
+      selectPillar(letter) { state.pillar = letter; },
+      selectExperiment(id) {
+        state.experimentId = id;
+        state.task = experiment().task || '';
+      },
+      setTask(value) { state.task = value; },
+      setCheckin(value) { state.checkin = value; },
+      togglePreview() { state.preview = !state.preview; },
+      async save() {
+        const result = await ICTV.saveTextFile(FILENAME, buildActiveFocusMarkdown());
+        if (result === 'cancelled') return;
+        state.saveResult = result;
+        if (result !== 'saved') state.preview = true;
       }
-
-      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      copiedState = true;
-      render();
     };
 
-    render();
+    const previewView = () => esc(buildActiveFocusMarkdown());
+
+    function view() {
+      const pillar = data.pillars[state.pillar];
+      return `
+        <header class="card">
+          <div class="row">
+            <div class="stack" style="gap: 4px">
+              <span class="eyebrow">ICTV Coach · Assessment from your own work</span>
+              <h1>${esc(data.userName)}: working diagnosis</h1>
+              <p class="muted">${esc(data.roleSummary)}</p>
+            </div>
+            <span class="tag">Assessed ${esc(data.date)}</span>
+          </div>
+          <div class="grid two">
+            <div class="panel">
+              <span class="eyebrow quiet">What already works well</span>
+              <ul class="stack" style="gap: 6px">${data.strengths.map(s => `<li>${esc(s)}</li>`).join('')}</ul>
+            </div>
+            <div class="panel key">
+              <div class="row"><span class="eyebrow">Your main blocker · ${esc(data.primaryBlockerLetter)}</span><span class="tag on">Start here</span></div>
+              <p class="strong">${esc(data.primaryBlockerHeadline)}</p>
+              <p class="muted small">Verification is not the last step of a pipeline. Writing down what good looks like shows what Instructions, Context or Tools need next.</p>
+            </div>
+          </div>
+        </header>
+
+        <section class="card">
+          <div class="row">
+            <div>
+              <h2>The ICTV loop in your work</h2>
+              <p class="muted small">Pick a letter to see what the audit found and the practice that goes with it.</p>
+            </div>
+            <span class="muted small">V pulls I, C and T up ↻</span>
+          </div>
+          <div class="grid four">
+            ${['V', 'I', 'C', 'T'].map(letter => {
+              const p = data.pillars[letter];
+              return `
+                <button class="choice" aria-pressed="${state.pillar === letter}" data-action="selectPillar" data-arg="${letter}" data-key="pillar-${letter}">
+                  <span class="row"><span style="font-size: 20px; font-weight: 700">${letter}</span><span class="tag ${data.primaryBlockerLetter === letter ? 'on' : ''}">${esc(p.tag)}</span></span>
+                  <span class="strong small">${esc(p.name)}</span>
+                </button>`;
+            }).join('')}
+          </div>
+          <div class="panel">
+            <p><span class="strong">${esc(state.pillar)} · ${esc(pillar.name)}.</span> <span class="muted">${esc(pillar.question)}</span></p>
+            <div class="grid two">
+              <div class="panel plain"><span class="eyebrow quiet">Seen in your work</span><p class="small">${esc(pillar.observedSignal)}</p></div>
+              <div class="panel plain"><span class="eyebrow">Practice</span><p class="small">${esc(pillar.intervention)}</p></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div>
+            <h2>Commit to one practice this week</h2>
+            <p class="muted small">Start with less than you think you need. Pick one and test it on a real task.</p>
+          </div>
+          <div class="stack">
+            ${data.experimentOptions.map(exp => `
+              <button class="choice" aria-pressed="${exp.id === state.experimentId}" data-action="selectExperiment" data-arg="${esc(exp.id)}" data-key="exp-${esc(exp.id)}">
+                <span class="row">
+                  <span class="row start"><span class="tag">${esc(exp.letter)}</span><span class="strong">${esc(exp.title)}</span></span>
+                  ${exp.recommended ? '<span class="tag on">Recommended</span>' : ''}
+                </span>
+                <span class="muted small">${esc(exp.whyItWorks)}</span>
+                <span class="small"><span class="strong">How we know it worked:</span> ${esc(exp.successMetric)}</span>
+              </button>`).join('')}
+          </div>
+          <div class="row end">
+            <label class="field grow">Real task on my desk to test this on
+              <input data-key="task" data-input="setTask" value="${esc(state.task)}" />
+            </label>
+            <label class="field" style="flex: 0 1 200px">Next check-in
+              <input data-key="checkin" data-input="setCheckin" value="${esc(state.checkin)}" placeholder="e.g. Friday 15:00" />
+            </label>
+            <button class="btn" data-action="togglePreview" data-key="preview">${state.preview ? 'Hide file preview' : 'Preview file'}</button>
+            <button class="btn primary" data-action="save" data-key="save">Save ${FILENAME}</button>
+          </div>
+          ${state.saveResult ? `<div class="panel key small" role="status"><span>${ICTV.saveMessage(state.saveResult, FILENAME, 'ictv-coach/')}</span></div>` : ''}
+          ${state.preview ? `<pre class="filepreview" data-live="preview">${previewView()}</pre>` : ''}
+        </section>`;
+    }
+
+    const page = { data, state, actions, view, buildActiveFocusMarkdown };
+    window.ICTV_PAGE = page;
+    ICTV.mount(document.getElementById('app'), view, actions, { preview: previewView });
   </script>
 </body>
 </html>

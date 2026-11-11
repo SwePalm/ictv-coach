@@ -4,15 +4,124 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ICTV Delegation Option Workbench</title>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <!-- Self-contained on purpose: no external scripts, styles or fonts, so the page opens anywhere. -->
+  <style>
+/* ictv-shared:css:start */
+/* Shared look for every ICTV Coach page. Edit here, then run: node tools/check.mjs --fix
+   Colours fall back to the host app's theme variables when the page is shown inside one. */
+:root {
+  color-scheme: light dark;
+  --ictv-bg: var(--background, #f5f6f8);
+  --ictv-surface: var(--card, #ffffff);
+  --ictv-sunken: var(--secondary, #eef1f5);
+  --ictv-line: var(--border, #d9dee7);
+  --ictv-text: var(--foreground, #131a26);
+  --ictv-muted: var(--muted-foreground, #545f71);
+  --ictv-accent: var(--primary, #0a66c2);
+  --ictv-on-accent: var(--primary-foreground, #ffffff);
+  --ictv-warn: #b45309;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ictv-bg: var(--background, #0c1118);
+    --ictv-surface: var(--card, #151c27);
+    --ictv-sunken: var(--secondary, #1c2533);
+    --ictv-line: var(--border, #2b3647);
+    --ictv-text: var(--foreground, #eef2f7);
+    --ictv-muted: var(--muted-foreground, #9aa6b8);
+    --ictv-accent: var(--primary, #5cb3ff);
+    --ictv-on-accent: var(--primary-foreground, #08111c);
+    --ictv-warn: #f5b041;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px 16px 48px;
+  background: var(--ictv-bg);
+  color: var(--ictv-text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+#app { max-width: 880px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2, h3, p, ul { margin: 0; }
+h1 { font-size: 22px; line-height: 1.25; }
+h2 { font-size: 16px; }
+h3 { font-size: 14px; }
+ul { padding-left: 18px; }
+code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ictv-accent); outline-offset: 2px; }
+
+.card { background: var(--ictv-surface); border: 1px solid var(--ictv-line); border-radius: 14px; padding: 22px; display: grid; gap: 14px; }
+.panel { background: var(--ictv-sunken); border: 1px solid var(--ictv-line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; align-content: start; }
+.panel.plain { background: var(--ictv-surface); }
+.panel.key { border: 2px solid var(--ictv-accent); }
+.row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.row.start { justify-content: flex-start; }
+.row.end { align-items: flex-end; }
+.stack { display: grid; gap: 10px; align-content: start; }
+.grow { flex: 1 1 220px; min-width: 0; }
+.grid { display: grid; gap: 12px; }
+@media (min-width: 720px) {
+  .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 719px) { .grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ictv-accent); }
+.eyebrow.quiet { color: var(--ictv-muted); }
+.muted { color: var(--ictv-muted); }
+.small { font-size: 13px; }
+.strong { font-weight: 600; }
+.warn { color: var(--ictv-warn); }
+.struck { text-decoration: line-through; color: var(--ictv-muted); }
+.pre { white-space: pre-line; }
+
+.tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--ictv-line); background: var(--ictv-surface); white-space: nowrap; }
+.tag.on { background: var(--ictv-accent); border-color: var(--ictv-accent); color: var(--ictv-on-accent); }
+
+.btn { border: 1px solid var(--ictv-line); background: var(--ictv-sunken); border-radius: 9px; padding: 8px 14px; font-size: 13px; font-weight: 600; }
+.btn:hover { border-color: var(--ictv-accent); }
+.btn.primary { background: var(--ictv-accent); border-color: var(--ictv-accent); color: var(--ictv-on-accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.link { border: 0; background: none; padding: 0; color: var(--ictv-accent); text-decoration: underline; font-weight: 500; }
+.btn.small { padding: 5px 10px; }
+
+.choice { display: grid; gap: 6px; align-content: start; width: 100%; text-align: left; background: var(--ictv-bg); border: 1px solid var(--ictv-line); border-radius: 12px; padding: 14px; }
+.choice:hover { border-color: var(--ictv-accent); }
+.choice[aria-pressed="true"] { background: var(--ictv-sunken); border-color: var(--ictv-accent); box-shadow: inset 0 0 0 1px var(--ictv-accent); }
+.choice.slim { padding: 8px 12px; border-radius: 9px; font-size: 13px; font-weight: 500; }
+.choice.slim[aria-pressed="true"] { background: var(--ictv-accent); color: var(--ictv-on-accent); }
+
+.field { display: grid; gap: 4px; font-size: 12.5px; color: var(--ictv-muted); }
+.field input, .field select, .field textarea { width: 100%; background: var(--ictv-bg); color: var(--ictv-text); border: 1px solid var(--ictv-line); border-radius: 9px; padding: 8px 10px; font-size: 14px; }
+.field textarea { resize: vertical; min-height: 64px; line-height: 1.4; }
+.sample { background: var(--ictv-surface); border: 1px solid var(--ictv-line); border-radius: 8px; padding: 10px; white-space: pre-line; }
+.filepreview { margin: 0; background: var(--ictv-bg); border: 1px solid var(--ictv-line); border-radius: 10px; padding: 14px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 460px; overflow: auto; }
+.checks { list-style: none; padding: 0; display: grid; gap: 6px; font-size: 13.5px; }
+.checks li { display: grid; grid-template-columns: 20px 1fr; gap: 6px; }
+@media print { .btn, .noprint { display: none; } body { background: #fff; } }
+/* ictv-shared:css:end */
+  </style>
 </head>
-<body class="bg-[var(--background)] text-[var(--foreground)] antialiased p-6">
-  <!-- Data Payload: Coach populates this JSON object with domain-informed options, pros/cons, taste samples, and ICTV building blocks -->
+<body>
+  <!-- Data payload. The coach fills this JSON with approaches, trade-offs, taste samples and pre-drafted ICTV rules. Optional keys: owner, objective, doneLooksLike, trustPlan.
+       Write plain text only (the page escapes it), keep it valid JSON, and never include a closing script tag. -->
   <script id="ictv-workbench-data" type="application/json">
   {
     "taskTitle": "Executive & Board Intelligence Brief",
     "taskSlug": "board-intelligence-brief",
     "date": "2026-10-17",
+    "owner": "",
+    "objective": "Give the executive team and board one page per week that shows which decisions need an owner, so meeting time goes to deciding instead of catching up.",
+    "doneLooksLike": "A reader with five minutes can name every open decision, its owner and its deadline, and can trace each number to a source file.",
+    "trustPlan": {
+      "firstRuns": "For the first 3 runs, read the Check Report first, then spot-check everything listed under Assumptions and Not checked against the source files.",
+      "withdrawWhen": "A check is reported as passed but fails when I spot-check it. Log the miss in ictv-coach/misses-ledger.md and reopen this handover."
+    },
     "framingSummary": "Instead of starting from a blank page of questions, select one approach—or combine multiple options (such as B + C)—and curate the pre-drafted ICTV rules below.",
     "options": [
       {
@@ -138,347 +247,373 @@
   }
   </script>
 
-  <div class="max-w-4xl mx-auto space-y-6" id="app"></div>
+  <main id="app"></main>
 
   <script>
-    (function ensureStandaloneTheme() {
-      const root = document.documentElement;
-      const computed = getComputedStyle(root).getPropertyValue('--card').trim();
-      if (!computed) {
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const vars = prefersDark ? {
-          '--background': '#0b0f17',
-          '--card': '#131b2e',
-          '--content': '#182238',
-          '--border': '#26324d',
-          '--foreground': '#f1f5f9',
-          '--muted-foreground': '#94a3b8',
-          '--primary': '#38bdf8',
-          '--primary-foreground': '#090d16',
-          '--secondary': '#1e293b',
-          '--secondary-foreground': '#e2e8f0',
-          '--accent': '#1e293b'
-        } : {
-          '--background': '#f8fafc',
-          '--card': '#ffffff',
-          '--content': '#f1f5f9',
-          '--border': '#e2e8f0',
-          '--foreground': '#0f172a',
-          '--muted-foreground': '#475569',
-          '--primary': '#0284c7',
-          '--primary-foreground': '#ffffff',
-          '--secondary': '#f1f5f9',
-          '--secondary-foreground': '#0f172a',
-          '--accent': '#e2e8f0'
-        };
-        Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
+/* ictv-shared:js:start */
+// Shared helpers for every ICTV Coach page. Edit here, then run: node tools/check.mjs --fix
+const ICTV = (() => {
+  const ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+  // Everything from the data payload or typed by the person goes through esc() before it becomes HTML.
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ESCAPES[ch]);
+
+  // Keeps a value on one line so it cannot break the structure of a saved Markdown file.
+  const oneLine = value => String(value ?? '').replace(/\s*\n\s*/g, ' ').trim();
+
+  const readPayload = id => JSON.parse(document.getElementById(id).textContent);
+
+  // Returns 'saved' (written where the person chose), 'downloaded' (sent to the Downloads folder),
+  // 'cancelled' (the person closed the dialog) or 'blocked' (this viewer allows neither).
+  async function saveTextFile(filename, text) {
+    if (typeof window.showSaveFilePicker === 'function') {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{ description: 'Markdown file', accept: { 'text/markdown': ['.md'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(text);
+        await writable.close();
+        return 'saved';
+      } catch (err) {
+        if (err && err.name === 'AbortError') return 'cancelled';
+        // Embedded viewers refuse the dialog. Fall through to a plain download.
       }
-    })();
-
-    const data = JSON.parse(document.getElementById('ictv-workbench-data').textContent);
-    let expandedDetails = { 'opt-b': true, 'opt-c': true };
-    let customBoundary = '';
-    let savedBanner = false;
-    let showMarkdownPreview = false;
-
-    function getSelectedCodes() {
-      return data.options.filter(o => o.selected).map(o => o.code);
     }
+    try {
+      const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return 'downloaded';
+    } catch (err) {
+      return 'blocked';
+    }
+  }
 
-    function toggleOption(id) {
-      const opt = data.options.find(o => o.id === id);
-      if (!opt) return;
-      opt.selected = !opt.selected;
-      // Ensure at least one option stays selected
-      if (data.options.every(o => !o.selected)) {
-        opt.selected = true;
+  function saveMessage(result, filename, folder) {
+    const name = `<strong>${esc(filename)}</strong>`;
+    const where = `<code>${esc(folder)}</code>`;
+    if (result === 'saved') return `Saved ${name}. Keep it in ${where} so your assistant reads it next time.`;
+    if (result === 'downloaded') return `${name} was sent to your downloads. Move it to ${where}. If no file appeared, the full text is below: select it and save it under that name.`;
+    if (result === 'blocked') return `This viewer does not allow saving files. The full text of ${name} is below: select it and save it in ${where}.`;
+    return '';
+  }
+
+  // Draws view() into root and redraws after every action. Buttons carry data-action (and an optional
+  // data-arg); fields carry data-input. Typing updates state without a full redraw, so the cursor never
+  // jumps; only regions marked data-live="name" are refreshed, from live[name](). data-key lets keyboard
+  // focus survive a redraw.
+  function mount(root, view, actions, live = {}) {
+    function render() {
+      const active = document.activeElement;
+      const key = active && active.getAttribute ? active.getAttribute('data-key') : null;
+      root.innerHTML = view();
+      if (!key) return;
+      for (const el of root.querySelectorAll('[data-key]')) {
+        if (el.getAttribute('data-key') === key) { el.focus(); break; }
       }
-      render();
     }
+    root.addEventListener('click', event => {
+      const el = event.target.closest ? event.target.closest('[data-action]') : null;
+      if (!el || !root.contains(el)) return;
+      const action = actions[el.getAttribute('data-action')];
+      if (action) Promise.resolve(action(el.getAttribute('data-arg'))).then(render);
+    });
+    root.addEventListener('input', event => {
+      const el = event.target;
+      const name = el && el.getAttribute ? el.getAttribute('data-input') : null;
+      if (!name || !actions[name]) return;
+      actions[name](el.value);
+      for (const region of root.querySelectorAll('[data-live]')) {
+        const draw = live[region.getAttribute('data-live')];
+        if (draw) region.innerHTML = draw();
+      }
+    });
+    root.addEventListener('keydown', event => {
+      const el = event.target;
+      const name = event.key === 'Enter' && el && el.getAttribute ? el.getAttribute('data-enter') : null;
+      if (name && actions[name]) { event.preventDefault(); Promise.resolve(actions[name]()).then(render); }
+    });
+    render();
+    return render;
+  }
 
-    function toggleDetails(id, event) {
-      if (event) event.stopPropagation();
-      expandedDetails[id] = !expandedDetails[id];
-      render();
-    }
+  const LETTERS = {
+    V: { name: 'Verification', hint: 'A flaw got through because no written-down check would have caught it.' },
+    I: { name: 'Instructions', hint: 'The goal or a "not acceptable" boundary was unstated or vague.' },
+    C: { name: 'Context', hint: 'The assistant had to guess background, audience or examples that live in your head.' },
+    T: { name: 'Tools', hint: 'The assistant guessed something it should have looked up or calculated, or it had the wrong access.' }
+  };
 
-    function cycleBlockState(id) {
-      const b = data.buildingBlocks.find(x => x.id === id);
-      if (!b) return;
-      const order = ['keep', 'optional', 'strike'];
-      b.state = order[(order.indexOf(b.state) + 1) % order.length];
-      render();
-    }
+  return { esc, oneLine, readPayload, saveTextFile, saveMessage, mount, LETTERS };
+})();
+/* ictv-shared:js:end */
 
-    function addCustomBlock() {
-      if (!customBoundary.trim()) return;
-      data.buildingBlocks.push({
-        id: 'bb-custom-' + Date.now(),
-        fromOptions: getSelectedCodes(),
-        letter: 'I',
-        category: 'Custom Rule',
-        text: customBoundary.trim(),
-        state: 'keep'
-      });
-      customBoundary = '';
-      render();
+    const data = ICTV.readPayload('ictv-workbench-data');
+    const { esc, oneLine } = ICTV;
+    const trust = data.trustPlan || {};
+    const state = {
+      open: Object.fromEntries(data.options.filter(o => o.selected).map(o => [o.id, true])),
+      owner: data.owner || '',
+      objective: data.objective || '',
+      done: data.doneLooksLike || '',
+      newRule: '',
+      newRuleLetter: 'I',
+      customCount: 0,
+      preview: false,
+      saveResult: ''
+    };
+    const STATES = ['keep', 'optional', 'strike'];
+    const SECTION = { I: 'Not acceptable and other rules', C: 'Inputs and how results arrive', T: 'Access and handbrake', V: 'Checks' };
+
+    const selectedOptions = () => data.options.filter(o => o.selected);
+    const selectedCodes = () => selectedOptions().map(o => o.code);
+    const activeSample = () => (data.tasteSamples.selected === 'A' ? data.tasteSamples.sampleA : data.tasteSamples.sampleB);
+    // A rule is in play when it belongs to a selected approach. Rules the person adds are always in play.
+    const visibleBlocks = () => {
+      const codes = selectedCodes();
+      return data.buildingBlocks.filter(b => b.custom || b.fromOptions.some(code => codes.includes(code)));
+    };
+    const liveBlocks = letter => visibleBlocks().filter(b => b.state !== 'strike' && (!letter || b.letter === letter));
+    const filename = () => `${data.taskSlug}-handover.md`;
+
+    // The coach's own check on the handover, shown before the person saves it.
+    function handoverChecks() {
+      const text = b => `${b.category} ${b.text}`;
+      const checkCount = liveBlocks('V').length + 2; // plus the style check and the assumptions check
+      return [
+        { ok: !!state.objective.trim() && !!state.done.trim(), label: 'The job and what done looks like are written down.', gap: 'Objective or "done looks like" is empty.' },
+        { ok: liveBlocks('I').some(b => /not acceptable|do not|don't|never/i.test(text(b))), label: 'At least one "not acceptable" boundary is kept.', gap: 'No "not acceptable" boundary is kept.' },
+        { ok: liveBlocks('C').length > 0, label: 'It says where the inputs come from.', gap: 'No context rule is kept, so the assistant will guess where inputs live.' },
+        { ok: liveBlocks('T').some(b => /handbrake|stop (and|&) ask|ask before|ask me/i.test(text(b))), label: 'There is a handbrake: a condition to stop and ask.', gap: 'No handbrake is kept. Nothing tells the assistant when to stop and ask.' },
+        { ok: checkCount >= 3, label: `${checkCount} written-down checks (aim for 3 to 5).`, gap: 'Fewer than 3 written-down checks.' },
+        { ok: !!state.owner.trim(), label: 'Someone has put their name under it.', gap: 'No accountable owner is named.' }
+      ];
     }
 
     function buildHandoverMarkdown() {
-      const selectedOpts = data.options.filter(o => o.selected);
-      const selectedCodes = selectedOpts.map(o => o.code);
-      const activeSample = data.tasteSamples.selected === 'A' ? data.tasteSamples.sampleA : data.tasteSamples.sampleB;
-      const relevantBlocks = data.buildingBlocks.filter(b =>
-        b.state !== 'strike' && b.fromOptions.some(code => selectedCodes.includes(code))
-      );
+      const options = selectedOptions();
+      const sample = activeSample();
+      const rule = b => `- **${oneLine(b.category)}${b.state === 'optional' ? ' (optional)' : ''}:** ${oneLine(b.text)}`;
+      const rules = letter => liveBlocks(letter).map(rule).join('\n') || '- [None kept. Add one before the first run.]';
+      const checks = [
+        { name: 'Style and framing', text: sample.derivedRuleV },
+        ...liveBlocks('V').map(b => ({ name: b.category + (b.state === 'optional' ? ', optional' : ''), text: b.text })),
+        { name: 'Assumptions and unknowns', text: 'Every assumption is marked as `[Assumption: ...]`, and a `Not checked:` line lists what could not be verified.' }
+      ];
+      const gaps = handoverChecks().filter(c => !c.ok);
 
-      const byLetter = l => relevantBlocks.filter(b => b.letter === l);
+      return `# Task Handover: ${oneLine(data.taskTitle)}
 
-      return `# Task Handover: ${data.taskTitle}
-
-*Generated via ICTV Option Workbench on ${data.date}*  
-*Selected Operating Model(s):* ${selectedOpts.map(o => `**${o.name}**`).join(' + ')}
+*Accountable Owner (Signature):* ${oneLine(state.owner) || '[Your name]'}  
+*Last Updated:* ${oneLine(data.date)}  
+*Chosen Approach:* ${options.map(o => oneLine(o.name)).join(' + ')}
 
 ---
 
-## 1. Chosen Operating Approach
-${selectedOpts.map(o => `- **${o.name}:** ${o.summary}`).join('\n')}
+## Chosen Approach
+${options.map(o => `- **${oneLine(o.name)}:** ${oneLine(o.summary)}\n  - *Where it breaks:* ${oneLine(o.whereItBreaks)}`).join('\n')}
 
-## 2. I — Instructions (What Is the Job & Boundaries?)
-- **Output Style Preference:** ${activeSample.label}
-- **Style Rule:** ${activeSample.derivedRuleI}
-${byLetter('I').map(b => `- **[${b.state.toUpperCase()}] ${b.category}:** ${b.text}`).join('\n')}
+## I — Instructions (What Is the Job?)
+- **Objective:** ${oneLine(state.objective) || '[One sentence: what this job accomplishes and why.]'}
+- **Done Looks Like:** ${oneLine(state.done) || '[How would a colleague know this is ready to use?]'}
+- **Output Style (${oneLine(sample.label)}):** ${oneLine(sample.derivedRuleI)}
+${rules('I')}
 
-## 3. C — Context (Inputs & Format)
-${byLetter('C').map(b => `- **[${b.state.toUpperCase()}] ${b.category}:** ${b.text}`).join('\n')}
+## C — Context (What Does It Need to Know?)
+${rules('C')}
 
-## 4. T — Tools & Access Boundaries (With Handbrake)
-${byLetter('T').map(b => `- **[${b.state.toUpperCase()}] ${b.category}:** ${b.text}`).join('\n')}
+## T — Tools & Access Boundaries (What Can It Touch?)
+${rules('T')}
 
-## 5. V — Verification (Check Report Before Result)
-Run these checks and print the **Check Report** at the top of the response before showing the draft:
-- [ ] **Style & Framing Check:** ${activeSample.derivedRuleV}
-${byLetter('V').map(b => `- [ ] **${b.category} (${b.state.toUpperCase()}):** ${b.text}`).join('\n')}
-- [ ] **Mandatory Boundary:** Include \`Bracketed Assumptions: [...]\` and a \`Not checked:\` line.
-`;
+## V — Verification (Check Report Before Result)
+Before presenting or saving the result, run these checks and print the **Check Report** at the top of the response:
+
+${checks.map((c, i) => `- [ ] **V${i + 1} (${oneLine(c.name)}):** ${oneLine(c.text)}`).join('\n')}
+
+## Trust & Review Plan
+- **First 3 Runs:** ${oneLine(trust.firstRuns) || 'Read the Check Report first, then spot-check everything listed under Assumptions and Not checked.'}
+- **Withdraw Trust and Reopen This Handover When:** ${oneLine(trust.withdrawWhen) || 'A check is reported as passed but fails on a human spot-check. Log the miss in ictv-coach/misses-ledger.md.'}
+${gaps.length ? `\n## Open Gaps (Close These Before Relying on the Result)\n${gaps.map(g => `- ${g.gap}`).join('\n')}\n` : ''}`;
     }
 
-    async function saveHandoverFile() {
-      const md = buildHandoverMarkdown();
-      const filename = `${data.taskSlug}-handover.md`;
-
-      // Try File System Access API first if available in top-level browser
-      if (window.showSaveFilePicker) {
-        try {
-          const handle = await window.showSaveFilePicker({
-            suggestedName: filename,
-            types: [{ description: 'Markdown File', accept: { 'text/markdown': ['.md'] } }]
-          });
-          const writable = await handle.createWritable();
-          await writable.write(md);
-          await writable.close();
-          savedBanner = true;
-          render();
-          return;
-        } catch (err) {
-          // User cancelled or iframe blocked showSaveFilePicker; fall through to <a download>
-        }
+    const actions = {
+      toggleOption(id) {
+        const option = data.options.find(o => o.id === id);
+        if (!option) return;
+        // At least one approach stays selected.
+        if (option.selected && selectedOptions().length === 1) return;
+        option.selected = !option.selected;
+      },
+      toggleDetails(id) { state.open[id] = !state.open[id]; },
+      pickSample(code) { data.tasteSamples.selected = code; },
+      cycleBlock(id) {
+        const block = data.buildingBlocks.find(b => b.id === id);
+        if (block) block.state = STATES[(STATES.indexOf(block.state) + 1) % STATES.length];
+      },
+      setOwner(value) { state.owner = value; },
+      setObjective(value) { state.objective = value; },
+      setDone(value) { state.done = value; },
+      setNewRule(value) { state.newRule = value; },
+      setNewRuleLetter(value) { state.newRuleLetter = value; },
+      addRule() {
+        const text = state.newRule.trim();
+        if (!text) return;
+        state.customCount += 1;
+        data.buildingBlocks.push({
+          id: `bb-custom-${state.customCount}`,
+          custom: true,
+          fromOptions: [],
+          letter: state.newRuleLetter,
+          category: 'My rule',
+          text,
+          state: 'keep'
+        });
+        state.newRule = '';
+      },
+      togglePreview() { state.preview = !state.preview; },
+      async save() {
+        const result = await ICTV.saveTextFile(filename(), buildHandoverMarkdown());
+        if (result === 'cancelled') return;
+        state.saveResult = result;
+        if (result !== 'saved') state.preview = true;
       }
+    };
 
-      // Universal fallback: trigger direct file download (<a download>) + open saved preview
-      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+    const checksView = () => handoverChecks().map(c =>
+      `<li><span class="${c.ok ? '' : 'warn'}">${c.ok ? '✓' : '!'}</span><span class="${c.ok ? '' : 'warn'}">${esc(c.ok ? c.label : c.gap)}</span></li>`).join('');
+    const previewView = () => esc(buildHandoverMarkdown());
 
-      savedBanner = true;
-      showMarkdownPreview = true;
-      render();
-    }
+    function view() {
+      const codes = selectedCodes();
+      const sample = activeSample();
 
-    function render() {
-      const app = document.getElementById('app');
-      const selectedCodes = getSelectedCodes();
-      const visibleBlocks = data.buildingBlocks.filter(b =>
-        b.fromOptions.some(code => selectedCodes.includes(code))
-      );
-
-      app.innerHTML = `
-        <!-- Header -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">ICTV Coach · Delegation Option Workbench</span>
-            <span class="text-xs px-2.5 py-1 rounded-full bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)]">
-              Combined Active Options: <strong>${selectedCodes.join(' + ')}</strong>
-            </span>
+      return `
+        <header class="card">
+          <div class="row">
+            <span class="eyebrow">ICTV Coach · Delegation Option Workbench</span>
+            <span class="tag">Approach: <strong>${esc(codes.join(' + '))}</strong></span>
           </div>
-          <h1 class="text-xl font-bold mt-1 text-[var(--foreground)]">${data.taskTitle}</h1>
-          <p class="text-sm text-[var(--muted-foreground)] mt-1">${data.framingSummary}</p>
-        </div>
-
-        <!-- Step 1: Multi-Select Option Cards with Progressive Disclosure -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h2 class="text-base font-semibold text-[var(--foreground)]">Step 1 · Select One or Combine Multiple Approaches (e.g., B + C)</h2>
-              <p class="text-xs text-[var(--muted-foreground)]">Click any card to toggle it into your combined workflow. Use "Inspect Trade-offs" for progressive disclosure.</p>
-            </div>
+          <h1>${esc(data.taskTitle)}</h1>
+          <p class="muted">${esc(data.framingSummary)}</p>
+          <div class="grid two">
+            <label class="field">The job in one sentence
+              <textarea rows="3" data-key="objective" data-input="setObjective" placeholder="What this job accomplishes and why">${esc(state.objective)}</textarea>
+            </label>
+            <label class="field">Done looks like
+              <textarea rows="3" data-key="done" data-input="setDone" placeholder="How a colleague would know it is ready to use">${esc(state.done)}</textarea>
+            </label>
           </div>
+        </header>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-            ${data.options.map(opt => {
-              const isOpen = !!expandedDetails[opt.id];
-              return `
-                <div onclick="toggleOption('${opt.id}')" class="cursor-pointer rounded-xl border p-4 transition-all flex flex-col justify-between ${opt.selected ? 'border-2 border-[var(--primary)] bg-[var(--secondary)] shadow-sm' : 'border-[var(--border)] bg-[var(--background)] opacity-80 hover:opacity-100'}">
-                  <div>
-                    <div class="flex items-center justify-between gap-2">
-                      <span class="text-xs font-bold px-2.5 py-0.5 rounded ${opt.selected ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' : 'bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)]'}">
-                        ${opt.selected ? `✓ Option ${opt.code} Included` : `+ Include Option ${opt.code}`}
-                      </span>
-                      <button onclick="toggleDetails('${opt.id}', event)" class="text-xs text-[var(--primary)] underline">
-                        ${isOpen ? 'Hide trade-offs' : 'Inspect trade-offs'}
-                      </button>
-                    </div>
-                    <h3 class="text-sm font-bold text-[var(--foreground)] mt-2.5">${opt.name}</h3>
-                    <p class="text-xs text-[var(--muted-foreground)] mt-1">${opt.summary}</p>
-                  </div>
-
-                  ${isOpen ? `
-                    <div class="mt-3 pt-3 border-t border-[var(--border)] space-y-2 text-xs" onclick="event.stopPropagation()">
-                      <div>
-                        <div class="font-semibold text-[var(--primary)]">+ Pros:</div>
-                        <ul class="list-disc pl-4 text-[var(--foreground)] space-y-0.5 mt-0.5">
-                          ${opt.pros.map(p => `<li>${p}</li>`).join('')}
-                        </ul>
-                      </div>
-                      <div>
-                        <div class="font-semibold text-[var(--muted-foreground)]">− Cons:</div>
-                        <ul class="list-disc pl-4 text-[var(--muted-foreground)] space-y-0.5 mt-0.5">
-                          ${opt.cons.map(c => `<li>${c}</li>`).join('')}
-                        </ul>
-                      </div>
-                      <div class="p-2 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">
-                        <span class="font-semibold text-[var(--primary)]">Where it breaks:</span> ${opt.whereItBreaks}
-                      </div>
-                    </div>
-                  ` : ''}
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-
-        <!-- Step 2: A vs B Taste Calibrator -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-3">
+        <section class="card">
           <div>
-            <h2 class="text-base font-semibold text-[var(--foreground)]">Step 2 · Calibrate "What Good Looks Like" (React, Don't Describe)</h2>
-            <p class="text-xs text-[var(--muted-foreground)]">Pick the micro-sample that matches how you want results to read. Your choice automatically writes the Instruction (I) and Verification (V) rule.</p>
+            <h2>Step 1 · Pick one approach, or combine several</h2>
+            <p class="muted small">Each approach brings its own rules to Step 3. Open the trade-offs before you choose.</p>
           </div>
+          <div class="grid three">
+            ${data.options.map(o => `
+              <div class="stack">
+                <button class="choice" aria-pressed="${o.selected}" data-action="toggleOption" data-arg="${esc(o.id)}" data-key="opt-${esc(o.id)}">
+                  <span><span class="tag ${o.selected ? 'on' : ''}">${o.selected ? '✓ Included' : '+ Include'} · ${esc(o.code)}</span></span>
+                  <h3>${esc(o.name)}</h3>
+                  <span class="muted small">${esc(o.summary)}</span>
+                </button>
+                <button class="btn link small" aria-expanded="${!!state.open[o.id]}" data-action="toggleDetails" data-arg="${esc(o.id)}" data-key="det-${esc(o.id)}">
+                  ${state.open[o.id] ? 'Hide trade-offs' : 'Show trade-offs'}
+                </button>
+                ${state.open[o.id] ? `
+                  <div class="panel small">
+                    <div><span class="strong">Pros</span><ul>${o.pros.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>
+                    <div><span class="strong">Cons</span><ul class="muted">${o.cons.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>
+                    <div><span class="strong warn">Where it breaks:</span> ${esc(o.whereItBreaks)}</div>
+                  </div>` : ''}
+              </div>`).join('')}
+          </div>
+        </section>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <section class="card">
+          <div>
+            <h2>Step 2 · Show what good looks like</h2>
+            <p class="muted small">Pick the sample that reads the way you want the result to read. Your choice writes one instruction and one check for you.</p>
+          </div>
+          <div class="grid two">
             ${['A', 'B'].map(code => {
               const s = code === 'A' ? data.tasteSamples.sampleA : data.tasteSamples.sampleB;
-              const active = data.tasteSamples.selected === code;
+              const on = data.tasteSamples.selected === code;
               return `
-                <div onclick="data.tasteSamples.selected='${code}'; render();" class="cursor-pointer p-4 rounded-xl border transition-all ${active ? 'border-2 border-[var(--primary)] bg-[var(--secondary)]' : 'border-[var(--border)] bg-[var(--background)]'}">
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-[var(--foreground)]">${s.label}</span>
-                    ${active ? `<span class="text-xs px-2 py-0.5 rounded bg-[var(--primary)] text-[var(--primary-foreground)] font-semibold">Selected Style</span>` : ''}
-                  </div>
-                  <p class="text-xs text-[var(--muted-foreground)] font-mono mt-2 whitespace-pre-line p-2.5 rounded bg-[var(--card)] border border-[var(--border)]">${s.excerpt}</p>
-                </div>
-              `;
+                <button class="choice" aria-pressed="${on}" data-action="pickSample" data-arg="${code}" data-key="sample-${code}">
+                  <span class="row"><span class="strong small">${esc(s.label)}</span>${on ? '<span class="tag on">Selected</span>' : ''}</span>
+                  <span class="sample mono muted">${esc(s.excerpt)}</span>
+                </button>`;
             }).join('')}
           </div>
-
-          <div class="p-3 rounded-lg bg-[var(--secondary)] border border-[var(--border)] text-xs space-y-1">
-            <div><strong class="text-[var(--primary)]">Auto-Derived [I] Rule:</strong> ${(data.tasteSamples.selected === 'A' ? data.tasteSamples.sampleA : data.tasteSamples.sampleB).derivedRuleI}</div>
-            <div><strong class="text-[var(--primary)]">Auto-Derived [V] Check:</strong> ${(data.tasteSamples.selected === 'A' ? data.tasteSamples.sampleA : data.tasteSamples.sampleB).derivedRuleV}</div>
+          <div class="panel small">
+            <div><span class="strong">Instruction this adds:</span> ${esc(sample.derivedRuleI)}</div>
+            <div><span class="strong">Check this adds:</span> ${esc(sample.derivedRuleV)}</div>
           </div>
-        </div>
+        </section>
 
-        <!-- Step 3: Curate Merged ICTV Building Blocks -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h2 class="text-base font-semibold text-[var(--foreground)]">Step 3 · Curate the Merged ICTV Rules for Option(s) ${selectedCodes.join(' + ')}</h2>
-              <p class="text-xs text-[var(--muted-foreground)]">Click any rule to cycle between <strong>KEEP</strong>, <strong>OPTIONAL</strong>, or <strong>STRIKE</strong>.</p>
-            </div>
+        <section class="card">
+          <div>
+            <h2>Step 3 · Curate the rules for ${esc(codes.join(' + '))}</h2>
+            <p class="muted small">Click a rule to move it between <strong>keep</strong>, <strong>optional</strong> and <strong>strike</strong>. Start with less than you think you need.</p>
           </div>
-
-          <div class="space-y-2">
-            ${visibleBlocks.map(b => {
-              const badge = b.state === 'keep'
-                ? 'bg-[var(--primary)] text-[var(--primary-foreground)]'
-                : b.state === 'optional'
-                  ? 'bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)]'
-                  : 'bg-[var(--background)] text-[var(--muted-foreground)] line-through';
-              return `
-                <div onclick="cycleBlockState('${b.id}')" class="cursor-pointer p-3 rounded-xl bg-[var(--secondary)] border border-[var(--border)] flex items-center justify-between gap-3 hover:border-[var(--primary)] transition-all">
-                  <div class="space-y-0.5">
-                    <div class="flex items-center gap-2">
-                      <span class="text-xs font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)]">[${b.letter}] ${b.category}</span>
-                      <span class="text-xs text-[var(--muted-foreground)]">From Option ${b.fromOptions.join(' + ')}</span>
-                    </div>
-                    <p class="text-xs mt-1 ${b.state === 'strike' ? 'line-through text-[var(--muted-foreground)]' : 'text-[var(--foreground)]'}">${b.text}</p>
-                  </div>
-                  <span class="text-xs font-semibold px-3 py-1 rounded-lg uppercase shrink-0 ${badge}">${b.state}</span>
-                </div>
-              `;
-            }).join('')}
+          ${['I', 'C', 'T', 'V'].map(letter => {
+            const blocks = visibleBlocks().filter(b => b.letter === letter);
+            return `
+              <div class="stack">
+                <div class="eyebrow quiet">${letter} · ${ICTV.LETTERS[letter].name} · ${SECTION[letter]}</div>
+                ${blocks.length ? blocks.map(b => `
+                  <button class="choice" aria-pressed="${b.state !== 'strike'}" data-action="cycleBlock" data-arg="${esc(b.id)}" data-key="bb-${esc(b.id)}">
+                    <span class="row">
+                      <span class="small"><span class="strong">${esc(b.category)}</span> <span class="muted">· ${b.custom ? 'added by you' : `from ${esc(b.fromOptions.join(' + '))}`}</span></span>
+                      <span class="tag ${b.state === 'keep' ? 'on' : ''}">${esc(b.state)}</span>
+                    </span>
+                    <span class="small ${b.state === 'strike' ? 'struck' : ''}">${esc(b.text)}</span>
+                  </button>`).join('') : `<p class="muted small">No ${ICTV.LETTERS[letter].name.toLowerCase()} rule yet for this approach.</p>`}
+              </div>`;
+          }).join('')}
+          <div class="row end">
+            <label class="field" style="flex: 0 0 150px">Add your own rule to
+              <select data-key="new-letter" data-input="setNewRuleLetter">
+                ${['I', 'C', 'T', 'V'].map(l => `<option value="${l}" ${state.newRuleLetter === l ? 'selected' : ''}>${l} · ${ICTV.LETTERS[l].name}</option>`).join('')}
+              </select>
+            </label>
+            <label class="field grow">Rule
+              <input data-key="new-rule" data-input="setNewRule" data-enter="addRule" value="${esc(state.newRule)}" placeholder="A boundary, a source, a stop condition or a check" />
+            </label>
+            <button class="btn" data-action="addRule" data-key="add-rule">Add rule</button>
           </div>
+        </section>
 
-          <!-- Add 1 Custom Rule -->
-          <div class="flex gap-2 pt-2">
-            <input
-              type="text"
-              placeholder="Have an opinion to add? Type a custom boundary or check here..."
-              value="${customBoundary}"
-              oninput="customBoundary = this.value"
-              class="flex-1 px-3 py-2 text-xs rounded-lg bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)]"
-            />
-            <button onclick="addCustomBlock()" class="px-3.5 py-2 rounded-lg bg-[var(--secondary)] border border-[var(--border)] text-xs font-semibold text-[var(--foreground)] hover:border-[var(--primary)] shrink-0">
-              + Add Rule
-            </button>
+        <section class="card">
+          <div>
+            <h2>Step 4 · Read the check, sign, and save</h2>
+            <p class="muted small">The coach checks the handover before you rely on it. Anything still open is written into the file, so it is not forgotten.</p>
           </div>
-        </div>
-
-        <!-- Step 4: Save to File (No Broken Copy Buttons) -->
-        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 shadow-sm space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 class="text-base font-semibold text-[var(--foreground)]">Step 4 · Save Choices to File for the Next Step</h2>
-              <p class="text-xs text-[var(--muted-foreground)]">Saves <code>${data.taskSlug}-handover.md</code> to your folder so your agent reads your exact choices on the next turn.</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="showMarkdownPreview = !showMarkdownPreview; render();" class="px-3 py-2 rounded-lg bg-[var(--secondary)] border border-[var(--border)] text-xs font-semibold text-[var(--foreground)]">
-                ${showMarkdownPreview ? 'Hide File Preview' : 'Preview File'}
-              </button>
-              <button onclick="saveHandoverFile()" class="px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold hover:opacity-90 transition-opacity">
-                Save ${data.taskSlug}-handover.md
-              </button>
-            </div>
+          <ul class="checks" data-live="checks">${checksView()}</ul>
+          <div class="row end">
+            <label class="field grow">Accountable owner: who puts their name under the result?
+              <input data-key="owner" data-input="setOwner" value="${esc(state.owner)}" placeholder="Your name" />
+            </label>
+            <button class="btn" data-action="togglePreview" data-key="preview">${state.preview ? 'Hide file preview' : 'Preview file'}</button>
+            <button class="btn primary" data-action="save" data-key="save">Save ${esc(filename())}</button>
           </div>
-
-          ${savedBanner ? `
-            <div class="p-3 rounded-lg bg-[var(--secondary)] border border-[var(--primary)] text-xs text-[var(--foreground)]">
-              ✓ Saved <strong>${data.taskSlug}-handover.md</strong>! Place it in <code>ictv-coach/handovers/</code> (or tell your agent in chat: <em>"Run the handover we just configured"</em>).
-            </div>
-          ` : ''}
-
-          ${showMarkdownPreview ? `
-            <pre class="p-4 rounded-xl bg-[var(--background)] border border-[var(--border)] text-xs font-mono text-[var(--foreground)] overflow-x-auto whitespace-pre-wrap">${buildHandoverMarkdown()}</pre>
-          ` : ''}
-        </div>
-      `;
+          ${state.saveResult ? `<div class="panel key small" role="status"><span>${ICTV.saveMessage(state.saveResult, filename(), 'ictv-coach/handovers/')}</span></div>` : ''}
+          ${state.preview ? `<pre class="filepreview" data-live="preview">${previewView()}</pre>` : ''}
+        </section>`;
     }
 
-    render();
+    const page = { data, state, actions, view, buildHandoverMarkdown, handoverChecks };
+    window.ICTV_PAGE = page;
+    ICTV.mount(document.getElementById('app'), view, actions, { checks: checksView, preview: previewView });
   </script>
 </body>
 </html>

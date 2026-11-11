@@ -13,7 +13,7 @@ Before asking the user how their week went, inspect:
 4. **Recent Session History (if accessible):** Scan conversations from the last 7 days for signs of:
    * Long back-and-forth correction threads (untagged misses)
    * Repeated context pasting (candidates for the **3x Paste Rule**)
-   * Tasks done 3+ times that don't yet have a `handovers/<task>.md` file.
+   * Tasks done 3+ times that don't yet have a `handovers/<task>-handover.md` file.
 
 ---
 
@@ -36,7 +36,7 @@ Keep the check-in conversational and brief (aim for 5–10 minutes total):
 
 1. **Log Any Unrecorded Misses:** If the user mentions a failure from the week that wasn't logged yet, add it to `ictv-coach/misses-ledger.md` tagged to `[I]`, `[C]`, `[T]`, or `[V]`.
 2. **Write the Weekly Check-in Note:** Create `ictv-coach/check-ins/YYYY-WXX.md` using [weekly-checkin-template.md](../resources/weekly-checkin-template.md).
-3. **Generate the Interactive HTML Reflection:** Create `ictv-coach/check-ins/YYYY-WXX.html` using [weekly-reflection-ui-template.html](../resources/weekly-reflection-ui-template.html), populating the `#ictv-weekly-data` JSON payload with the week's real misses, committed practice, and candidate experiments for next week. If the environment supports Generative UI artifacts, render it directly for the user.
+3. **Generate the Interactive HTML Reflection:** Create `ictv-coach/check-ins/YYYY-WXX.html` using [weekly-reflection-ui-template.html](../resources/weekly-reflection-ui-template.html), populating the `#ictv-weekly-data` JSON payload with the week's real misses, committed practice, and candidate experiments for next week. If the environment supports Generative UI artifacts, render it directly for the user. Misses the user adds on the page are saved in the check-in under **To Append to `misses-ledger.md`**: copy them into the ledger, and make sure each one has a new check.
 4. **Set Next Week's Single Focus:** Update `ictv-coach/active-focus.md` with **one** clear, low-friction experiment for the coming week. Never pile on more than two active commitments at once.
 
 ---

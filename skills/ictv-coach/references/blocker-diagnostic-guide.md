@@ -76,8 +76,8 @@ Verification is the engine of the ICTV loop. Writing down what "good" looks like
 
 ### Tier 2 Blocker: *"I do this task every week, and every week the result comes back slightly different."*
 * **What's happening:** Treating a repeating job like a one-off conversation.
-* **The Practice to Coach:** **The Handover Interview -> Standing Brief.**
-  * Run the `unblock` workflow to interview the user across `I`, `C`, `T`, and `V` and save a reusable `ictv-coach/handovers/<task>.md`.
+* **The Practice to Coach:** **The Option Workbench -> Standing Handover.**
+  * Run the `unblock` workflow: propose options and pre-drafted `I`, `C`, `T`, and `V` rules for the user to curate, and save a reusable `ictv-coach/handovers/<task>-handover.md`.
   * Include an explicit **"Not acceptable"** section (negative constraints eliminate 80% of recurring annoyances).
 
 ### Tier 3 Blocker: *"My agent instructions have grown into a 2,000-word wall of rules, and the agent now ignores half of them."*

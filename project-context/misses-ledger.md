@@ -34,3 +34,21 @@ This file practices what `ictv-coach` teaches: logging real course corrections d
   1. Removed all clipboard copy buttons across `assessment-ui-template.html`, `weekly-reflection-ui-template.html`, and `option-workbench-ui-template.html`.
   2. Replaced them with direct **Save `<filename>.md`** file saving (`showSaveFilePicker` + `<a download>` fallback + inline file preview) so the user saves choices straight to their `ictv-coach/` folder for the next step to read.
 
+
+### 2026-11-11 — Interactive Pages Depended on One Vendor's Hosted Script — Tagged: `[T]` + `[V]`
+- **What went wrong:** All three HTML templates loaded their styling from a script hosted for a single vendor's app, while the README called them self-contained pages that open in any browser.
+- **Why it slipped through:** The pages were only viewed inside the app that provides that script (`[T]`), and no check opened them anywhere else (`[V]`).
+- **System upgrade applied:** Rebuilt the pages with their own styles and no network access (`decisions.md` D7).
+- **New check so it is caught next time:** `tools/check.mjs` fails if any page references an external script, style, or font.
+
+### 2026-11-11 — Text in the Data Payload Could Break or Hijack a Page — Tagged: `[I]` + `[V]`
+- **What went wrong:** Payload text and typed input were placed into the page as markup. A task called `R&D <draft>` lost characters, a quote in a custom rule broke the input field, and a payload could carry a script.
+- **Why it slipped through:** The templates never said that payload text is plain text (`[I]`), and the example payload contained no awkward characters (`[V]`).
+- **System upgrade applied:** Every value now passes through one escaping helper, and saved Markdown keeps each value on one line.
+- **New check so it is caught next time:** `tools/check.mjs` fills every payload field with hostile text and fails if any of it reaches the page as markup.
+
+### 2026-11-11 — Saved Files Drifted from Their Templates — Tagged: `[I]` + `[V]`
+- **What went wrong:** The workbench saved a handover without an objective, "done looks like", owner, or trust plan, although `handover-template.md` has all four. The weekly page saved internal codes (`check-report-first`) in place of readable answers. Cancelling the save dialog downloaded the file anyway.
+- **Why it slipped through:** Nothing tied a page's saved output to the Markdown template it is meant to follow.
+- **System upgrade applied:** The saved files now follow their templates, the workbench checks the handover before saving and writes open gaps into the file, and cancel means cancel.
+- **New check so it is caught next time:** `tools/check.mjs` fails if a saved file loses a heading from its template, or if a handover with no handbrake is not flagged.
