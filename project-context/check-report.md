@@ -36,6 +36,6 @@ The V3 link check and the V6 privacy check above were done by hand in October. T
 - `[Assumption: Users cloning the repository on GitHub may run the coach inside the repo itself; we should add a .gitignore rule for a personal local ictv-coach-session/ or document how to keep personal coaching notes private if forking.]`
 
 ## Not Checked
-- **The rebuilt pages inside each assistant's own viewer (Antigravity, Claude artifacts, ChatGPT canvas):** Tested in a plain browser only. Whether each viewer allows the file download is unknown; the on-page file text is the fallback.
+- **The rebuilt pages inside Claude artifacts and ChatGPT canvas:** Not tested. The workbench was seen rendering correctly inside Antigravity (2026-11-11), with a real coach-filled payload. Whether each viewer allows the file download is unknown; the on-page file text is the fallback.
 - **Live user trial on an external ChatGPT / Copilot session:** While the prompt structure in `chat-edition/ICTV-COACH-PROMPT.md` is verified for completeness, its behavioral feel in a live third-party web chat session with real user memory has not yet been field-tested with external users.
 - **Automated cron trigger (`sidecar.json`):** The weekly check-in protocol (`references/weekly-checkin-guide.md`) includes the self-contained automation prompt, but a live background cron job has not been enabled on this machine yet (requires user opt-in for day/time).
