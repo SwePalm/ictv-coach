@@ -52,3 +52,9 @@ This file practices what `ictv-coach` teaches: logging real course corrections d
 - **Why it slipped through:** Nothing tied a page's saved output to the Markdown template it is meant to follow.
 - **System upgrade applied:** The saved files now follow their templates, the workbench checks the handover before saving and writes open gaps into the file, and cancel means cancel.
 - **New check so it is caught next time:** `tools/check.mjs` fails if a saved file loses a heading from its template, or if a handover with no handbrake is not flagged.
+
+### 2026-11-12 — Save Dialog Opened in Documents, Not in the Coaching Folder — Tagged: `[T]` + `[I]`
+- **What went wrong:** In a first real run in an agentic workspace, clicking Save on the workbench opened the browser's dialog in Documents. The user would have had to navigate to a deeply nested `ictv-coach/handovers/` folder by hand.
+- **Why it slipped through:** A web page cannot choose the save folder; the browser decides (`[T]`). The skill told the coach to read the saved file from `ictv-coach/handovers/` but never said how the file gets there (`[I]`). Browser tests used a download folder, so the dialog was never seen.
+- **System upgrade applied:** The pages ask the browser to remember the last folder and say, before and after saving, that the file can be saved anywhere. `SKILL.md` has a new section, *Getting a Saved File into the Folder*: an agent that can write files offers to write the file from choices stated in chat, or moves a saved file into place with the user's OK.
+- **New check so it is caught next time:** `tools/check.mjs` fails if a page's save dialog has no remembered-folder id or if a page shows a save button without the save hint.

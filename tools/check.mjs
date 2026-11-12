@@ -225,6 +225,16 @@ check('Pages offer at most three choices where the person must pick one (the rul
   return problems;
 });
 
+check('Save buttons explain where the file goes, and the dialog remembers the last folder', () => {
+  const problems = [];
+  for (const page of PAGES) {
+    const html = read(page.file);
+    if (!/showSaveFilePicker\(\{[\s\S]{0,300}?\bid:\s*'ictv-coach'/.test(html)) problems.push(`${page.file}: the save dialog has no remembered-folder id`);
+    if (!loadPage(page).app.innerHTML.includes('tell your assistant where the file is')) problems.push(`${page.file}: no save hint next to the save button`);
+  }
+  return problems;
+});
+
 check('Relative links in Markdown files point at files that exist', () => {
   const problems = [];
   for (const file of files.filter(f => f.endsWith('.md'))) {

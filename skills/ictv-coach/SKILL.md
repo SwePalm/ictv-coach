@@ -71,6 +71,14 @@ ictv-coach/
 └── handovers/              # Option workbenches (<task>-workbench.html) & saved briefs (<task>-handover.md)
 ```
 
+### Getting a Saved File into the Folder
+
+A web page cannot choose where the browser's save dialog opens. It usually opens in Documents or Downloads, never in the user's `ictv-coach/` folder. Do not make the user navigate there. This applies to every page (assessment, workbench, weekly reflection).
+
+* **If you can write files in the workspace:** offer the shortcut first. The user tells you their choices in chat (for example *"B and C, style B, keep all rules, strike the red-team one"*), and you write the Markdown file straight into `ictv-coach/`, keeping the headings of the matching template in `resources/`. Read the result back to the user in two lines so they can confirm it.
+* **If the user clicked Save on the page:** look in `ictv-coach/` first. If the file is not there, ask where they saved it (most likely Documents or Downloads), then move it into place with their OK. Never search outside the workspace without asking.
+* **If you cannot write files (chat only):** tell the user to pick their `ictv-coach/` folder in the dialog once. The browser reopens there the next time.
+
 ---
 
 ## Workflow 1: Assess & Onboard (`assess`)
@@ -101,6 +109,7 @@ When the user brings a new idea to explore or a task they want to delegate:
      * Also pre-draft the payload's `objective`, `doneLooksLike`, and `trustPlan` (how the first 3 runs are read, and when trust is withdrawn) so the user edits a proposal instead of facing empty fields.
 2. **Save Choices to `ictv-coach/handovers/<task-slug>-handover.md`:**
    * The user clicks **Save `<task-slug>-handover.md`** in the workbench (or tells you which options/rules they toggled), and you write/read the saved `ictv-coach/handovers/<task-slug>-handover.md` file (formatted like [handover-template.md](resources/handover-template.md)) in the next step.
+   * Follow **Getting a Saved File into the Folder** below so the user never has to hunt for the right folder in a save dialog.
 3. **Close Open Gaps First:** If the saved handover has an **Open Gaps** section, resolve each gap with the user before the first run.
 4. **Execute with Check Report First:** When running the task from the saved handover file, always output the **Check Report** (including `[Assumption]` tags and a `"Not checked:"` line) *before* presenting the draft.
 

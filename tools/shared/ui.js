@@ -16,6 +16,10 @@ const ICTV = (() => {
     if (typeof window.showSaveFilePicker === 'function') {
       try {
         const handle = await window.showSaveFilePicker({
+          // The browser, not this page, decides where the dialog opens. The id makes it reopen in
+          // the folder the person picked last time.
+          id: 'ictv-coach',
+          startIn: 'documents',
           suggestedName: filename,
           types: [{ description: 'Markdown file', accept: { 'text/markdown': ['.md'] } }]
         });
@@ -46,7 +50,7 @@ const ICTV = (() => {
   function saveMessage(result, filename, folder) {
     const name = `<strong>${esc(filename)}</strong>`;
     const where = `<code>${esc(folder)}</code>`;
-    if (result === 'saved') return `Saved ${name}. Keep it in ${where} so your assistant reads it next time.`;
+    if (result === 'saved') return `Saved ${name}. It belongs in ${where}. If you saved it somewhere else, tell your assistant where it is and it will move it for you.`;
     if (result === 'downloaded') return `${name} was sent to your downloads. Move it to ${where}. If no file appeared, the full text is below: select it and save it under that name.`;
     if (result === 'blocked') return `This viewer does not allow saving files. The full text of ${name} is below: select it and save it in ${where}.`;
     return '';
@@ -91,6 +95,9 @@ const ICTV = (() => {
     return render;
   }
 
+  // Shown beside every save button, before the dialog opens.
+  const saveHint = folder => `Your browser chooses where the save dialog opens, often Documents. Pick <code>${esc(folder)}</code> once and it is remembered. Or save anywhere and tell your assistant where the file is.`;
+
   const LETTERS = {
     V: { name: 'Verification', hint: 'A flaw got through because no written-down check would have caught it.' },
     I: { name: 'Instructions', hint: 'The goal or a "not acceptable" boundary was unstated or vague.' },
@@ -98,5 +105,5 @@ const ICTV = (() => {
     T: { name: 'Tools', hint: 'The assistant guessed something it should have looked up or calculated, or it had the wrong access.' }
   };
 
-  return { esc, oneLine, readPayload, saveTextFile, saveMessage, mount, LETTERS };
+  return { esc, oneLine, readPayload, saveTextFile, saveMessage, saveHint, mount, LETTERS };
 })();

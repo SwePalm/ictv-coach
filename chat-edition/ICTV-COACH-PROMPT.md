@@ -5,7 +5,7 @@ Use this file if you work primarily in **ChatGPT (Projects or Custom GPTs)**, **
 ## How to Set Up (2 Minutes)
 1. **Create a folder on your computer** named `ictv-coach` (for example, in your Documents or project folder).
 2. **Create a new Project / Custom GPT** in your AI chat tool and paste the prompt block below into its **Project Instructions / System Prompt** (or paste it into the first message of a pinned chat).
-3. Whenever the coach generates or updates one of your coaching files (`profile.md`, `active-focus.md`, `misses-ledger.md`, or a `handover.md`), save or upload that file into your `ictv-coach` folder so your context stays yours across any AI tool.
+3. Whenever the coach generates or updates one of your coaching files (`profile.md`, `active-focus.md`, `misses-ledger.md`, or a `handover.md`), save or upload that file into your `ictv-coach` folder so your context stays yours across any AI tool. The browser's save dialog usually opens in Documents or Downloads: pick your `ictv-coach` folder once and the browser reopens there next time.
 
 ---
 
