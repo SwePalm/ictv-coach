@@ -19,9 +19,23 @@
 
 ---
 
+## Checks Added 2026-11-11 (Run by `node tools/check.mjs`)
+
+The V3 link check and the V6 privacy check above were done by hand in October. They now run as a script on every push, together with these:
+
+- [x] **V7 (Self-Contained Pages):** No page loads a script, style, or font from the network, and none uses the clipboard.
+- [x] **V8 (Payload Text Stays Text):** Hostile text in every payload field never reaches a page as markup.
+- [x] **V9 (Saved Files Follow Their Templates):** `active-focus.md`, `<task>-handover.md`, and `YYYY-WXX.md` keep every heading of their Markdown templates.
+- [x] **V10 (Handover Gaps Are Flagged):** A handover with no handbrake is flagged on the page and in the saved file.
+- [x] **V11 (Checks Catch Planted Flaws):** Six deliberate flaws (unescaped text, an external script, a lost heading, a missing payload key, a changed shared style, a broken link with developer jargon) each made the script fail.
+- [x] **V12 (Real Browser Run):** All three pages were driven in Chromium in light, dark, and phone width: no errors, no network requests, no sideways scrolling, saving and cancelling behave as described.
+
+---
+
 ## Bracketed Assumptions
 - `[Assumption: Users cloning the repository on GitHub may run the coach inside the repo itself; we should add a .gitignore rule for a personal local ictv-coach-session/ or document how to keep personal coaching notes private if forking.]`
 
 ## Not Checked
+- **The rebuilt pages inside Claude artifacts and ChatGPT canvas:** Not tested. The workbench was seen rendering correctly inside Antigravity (2026-11-11), with a real coach-filled payload. Whether each viewer allows the file download is unknown; the on-page file text is the fallback.
 - **Live user trial on an external ChatGPT / Copilot session:** While the prompt structure in `chat-edition/ICTV-COACH-PROMPT.md` is verified for completeness, its behavioral feel in a live third-party web chat session with real user memory has not yet been field-tested with external users.
 - **Automated cron trigger (`sidecar.json`):** The weekly check-in protocol (`references/weekly-checkin-guide.md`) includes the self-contained automation prompt, but a live background cron job has not been enabled on this machine yet (requires user opt-in for day/time).

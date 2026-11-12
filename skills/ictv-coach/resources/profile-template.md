@@ -16,6 +16,10 @@
 - [Observation 1 from history/setup audit]
 - [Observation 2 from history/setup audit]
 
+## How I Learn Best
+- **Ways of Learning That Work for Me:** [e.g., Seeing a before and after on my own work; side-by-side comparisons]
+- **Retired Suggestions (Skipped Twice):** [Practice, date retired, and the way it was offered]
+
 ## My Standing Preferences (Voice & Working Rules)
 - **Tone & Style:** [e.g., Direct, plain business language, no hype]
 - **Never Do:** [e.g., Never invent citations; never rewrite a draft without showing the Check Report first]

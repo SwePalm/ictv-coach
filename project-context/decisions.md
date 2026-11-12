@@ -37,3 +37,27 @@
 * **Rationale:** When humans explore something new, they have the least information about what options exist, but the highest capacity for judgment once options and trade-offs are shown (*recognition over recall*). Furthermore, sandboxed UI iframes block clipboard API calls, whereas saving directly to a `.md` file reinforces the owned-context-folder habit and feeds the next step cleanly.
 
 
+
+## D7 — Pages Are Self-Contained: No Network, One Shared Look
+* **Subject:** `self-contained-pages`
+* **Status:** Accepted (2026-11-11)
+* **Decision:** The three HTML templates carry their own styles and script and load nothing from the network. They keep reading the host app's theme variables when those exist. The look and helpers live once in `tools/shared/` and are copied into each template by `node tools/check.mjs --fix`, so every page is still a single file. The coach generates a page by replacing only the JSON data payload.
+* **Rationale:** The templates depended on a stylesheet script hosted for one vendor's app. Anywhere that script is blocked or unavailable (offline, other assistants' artifact viewers, a locked-down company network) the pages lose all styling, which breaks the promise that context is owned and portable.
+
+## D8 — The Repo Runs Its Own Check Report
+* **Subject:** `deterministic-repo-checks`
+* **Status:** Accepted (2026-11-11)
+* **Decision:** `tools/check.mjs` is the repo's written-down definition of good, run locally and on every push. It prints a Check Report with a "Not checked" list. Each real miss on this repo adds a check to it.
+* **Rationale:** The earlier Check Report was written by hand, and the check script it referred to was never committed. Checks that run before a human reads the change are the far end of Verification, and the repo should show that practice, not only describe it.
+
+## D9 — Every Miss Ends with a Check, and Checks Are Pruned
+* **Subject:** `miss-becomes-check`
+* **Status:** Accepted (2026-11-11)
+* **Decision:** In the Loop workflow, a miss is tagged to its root cause as before, and in addition always adds or tightens one check in the task's handover. The ledger template has a line for it. To keep the list alive: tighten an existing check before adding a new one, and merge or drop checks at the weekly check-in when a handover grows past about five.
+* **Rationale:** A miss should be a learning experience that compounds. A miss tagged `[C]` and fixed by adding context teaches the setup once; a check keeps teaching on every later run. The extra minute is not the concern. The concern is a list so long that nobody reads the Check Report, which is why pruning is part of the decision.
+
+## D10 — The Rule of Three for Suggestions: Change the Way of Learning, Don't Repeat
+* **Subject:** `prune-suggestions`
+* **Status:** Accepted (2026-11-11)
+* **Decision:** The coach offers at most three candidate next steps. A practice left untested at two check-ins in a row is not offered a third time. It is retired without blame, and the same goal is offered through a different way of learning (do it, watch it, compare it, spot it, have it done). The way that works is recorded in `profile.md`. Stale blockers are removed, not carried forward.
+* **Rationale:** People learn in different ways, as in golf practice: if one method does not work, try another. A coach that repeats an unused suggestion forever becomes noise, and stale advice erodes trust in the rest.

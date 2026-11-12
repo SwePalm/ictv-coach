@@ -18,13 +18,15 @@ If a human just gave you this repository link and asked *"Help me use this"*, *"
 
 ### Path A: You Have Workspace / Local File Access *(Antigravity, Claude Code, Cursor, Windsurf, Codex)*
 1. **Install the Skill:**
-   * If you are already inside a clone of this repo, `.agents/skills/ictv-coach` is pre-linked.
+   * If you are already inside a clone of this repo, `.agents/skills/ictv-coach` and `.claude/skills/ictv-coach` are pre-linked.
    * Otherwise, clone or copy [`skills/ictv-coach/`](skills/ictv-coach/SKILL.md) into the user's workspace at `.agents/skills/ictv-coach/` (or their global skills directory, such as `~/.gemini/config/skills/ictv-coach` or `~/.claude/skills/ictv-coach`).
+   * Wherever the skill is installed, its `references/` and `resources/` files are found next to its `SKILL.md`, not in the current working directory. The user's `ictv-coach/` folder is separate and lives in their workspace.
 2. **Load the Skill Instructions:** Read [`skills/ictv-coach/SKILL.md`](skills/ictv-coach/SKILL.md) and [`skills/ictv-coach/references/history-and-memory-audit.md`](skills/ictv-coach/references/history-and-memory-audit.md).
 3. **Run Workflow 1 (`assess`) Immediately:**
    * Audit available workspace rules, memory files, and recent session transcripts for how the user currently works with AI.
    * Present their **Blocker Mirror** (what already works well + their #1 bottleneck across `I`, `C`, `T`, or `V`).
    * Create their `ictv-coach/` folder (`profile.md`, `active-focus.md`, and the interactive `assessment.html` from [`assessment-ui-template.html`](skills/ictv-coach/resources/assessment-ui-template.html)) and propose **one** small practice experiment for this week.
+   * Build each HTML page by copying its template and replacing **only** the JSON data payload at the top.
 
 ### Path B: You Are a Web or Chat Assistant Without Direct Disk Access *(ChatGPT, Claude Web / Projects, Microsoft Copilot)*
 1. **Load the Chat Edition Prompt:** Read [`chat-edition/ICTV-COACH-PROMPT.md`](chat-edition/ICTV-COACH-PROMPT.md) (and optionally [`skills/ictv-coach/references/blocker-diagnostic-guide.md`](skills/ictv-coach/references/blocker-diagnostic-guide.md)) and adopt those instructions as your active coaching persona.
@@ -104,8 +106,23 @@ ictv-coach/
 Once set up, just ask your AI:
 1. **"Assess how I use AI"** — Audits your recent transcripts/memory/files, reflects back what works and your #1 blocker, initializes `ictv-coach/`, and generates your interactive `assessment.html` dashboard.
 2. **"Help me unblock [task]" / "Explore [idea]"** — Instead of interrogating you with 10 blank-slate questions, generates an interactive **Delegation Option Workbench** (`<task>-workbench.html`) proposing 3 distinct ways to run the task (with Pros, Cons, and *"Where it breaks"*). Select one or combine multiple options (e.g., `B + C`), react to an A/B Taste Calibrator, toggle pre-drafted `I`, `C`, `T`, and `V` rules, and save `<task>-handover.md` directly to your folder.
-3. **"Tag this miss"** — When an AI output falls short, pauses manual rewriting to diagnose whether `[I]`, `[C]`, `[T]`, or `[V]` failed, upgrades your setup first, and logs it in `ictv-coach/misses-ledger.md`.
+3. **"Tag this miss"** — When an AI output falls short, pauses manual rewriting to diagnose whether `[I]`, `[C]`, `[T]`, or `[V]` failed, upgrades your setup first, adds a check so the same flaw is caught next time, and logs it in `ictv-coach/misses-ledger.md`.
 4. **"Run my weekly ICTV check-in"** — Reviews the past week's sessions and misses, checks whether your trust grew, and generates both `YYYY-WXX.md` and an interactive `YYYY-WXX.html` reflection page.
+
+---
+
+## The Repo Checks Itself
+
+This repository practices what it teaches: its checks run before anyone reads a change.
+
+```text
+node tools/check.mjs         # prints a Check Report, including a "Not checked" list
+node tools/check.mjs --fix   # after editing tools/shared/, copies it into the pages first
+```
+
+The script needs only Node 18+ and no packages. It verifies that the three HTML pages are self-contained (no network), that text from the data payload can never turn into markup, that the files the pages save keep the headings of their Markdown templates, that a handover without a handbrake is flagged, that every relative link resolves, and that coaching material stays in plain language. The same script runs on every push and pull request.
+
+The pages share one look and one set of helpers, kept in [`tools/shared/`](tools/shared/ui.css) and copied into each template so every page stays a single file.
 
 ---
 
@@ -119,6 +136,13 @@ Once set up, just ask your AI:
 | [`skills/ictv-coach/references/verification-and-trust-playbook.md`](skills/ictv-coach/references/verification-and-trust-playbook.md) | Check Report Before Result, the mandatory `"Not checked"` boundary, defending against *The Stowaway*, and the Miss Tagging Loop. |
 | [`skills/ictv-coach/references/weekly-checkin-guide.md`](skills/ictv-coach/references/weekly-checkin-guide.md) | Protocol for the 10-minute weekly retrospective and recurring schedule setup. |
 | [`skills/ictv-coach/resources/`](skills/ictv-coach/resources/) | Markdown templates + interactive HTML templates (`assessment-ui-template.html`, `option-workbench-ui-template.html`, `weekly-reflection-ui-template.html`). |
+| [`tools/check.mjs`](tools/check.mjs) | The repo's own Check Report, plus `tools/shared/` (the look and helpers every page shares). |
 | [`chat-edition/ICTV-COACH-PROMPT.md`](chat-edition/ICTV-COACH-PROMPT.md) | Standalone copy-paste prompt for ChatGPT Projects/Custom GPTs, Claude Projects, and Microsoft Copilot. |
 | [`project-context/`](project-context/brief.md) | Live example of dogfooding ICTV on this repo itself (`brief.md`, `decisions.md`, `misses-ledger.md`, `check-report.md`, `assessment.html`, `handovers/`, and `check-ins/2026-W42.html`). |
 
+
+---
+
+## License
+
+[MIT](LICENSE). Use it, change it, and share it freely, including commercially. Keep the copyright notice so the credit travels with it.

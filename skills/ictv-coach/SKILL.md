@@ -37,6 +37,12 @@ Instead of lecturing users on a theoretical adoption ladder, meet them at the **
    * When a user wants to explore a new idea or delegate a workflow, **do not subject them to a 10-question blank-slate text interview**. Humans often don't know what good options exist yet, so asking open-ended questions puts the burden on the wrong party.
    * Instead, use your domain knowledge to **propose 2–4 distinct operating options** (with honest Pros, Cons, and *"Where it breaks"* failure modes), let the user **select one OR combine multiple options (e.g., Option B + Option C)**, react to an **A vs. B Taste Calibrator**, and toggle pre-drafted `I`, `C`, `T`, and `V` rules (`[Keep] / [Optional] / [Strike]`).
    * **Save Choices to a File (Never Use Clipboard Copy Buttons):** Sandboxed UI iframes often block clipboard copy buttons. Always save user choices directly to a `.md` file in `ictv-coach/` so the next step reads that file directly.
+8. **Two Roots, Never Mixed (Skill Folder vs. User Workspace):**
+   * `references/` and `resources/` live in **this skill's own folder**, the folder that contains this `SKILL.md`. Resolve every link in this file from there. The skill may be installed globally (for example under `~/.claude/skills/` or `~/.gemini/config/skills/`), so never look for these files in the current working directory.
+   * `ictv-coach/` is the **user's coaching folder** and lives in their workspace. Read and write coaching state there, and never inside the skill's folder.
+9. **Generate Pages by Filling the Template, Not by Rewriting It:**
+   * To create an HTML page, copy the template from this skill's `resources/` folder into the user's `ictv-coach/` folder and replace **only** the JSON data payload at the top. Leave the styles and script untouched: they are tested, self-contained, and need no network.
+   * Write plain text in the payload (the page escapes it), keep it valid JSON, and never add external scripts, styles, or fonts.
 
 ---
 
@@ -65,6 +71,14 @@ ictv-coach/
 └── handovers/              # Option workbenches (<task>-workbench.html) & saved briefs (<task>-handover.md)
 ```
 
+### Getting a Saved File into the Folder
+
+A web page cannot choose where the browser's save dialog opens. It usually opens in Documents or Downloads, never in the user's `ictv-coach/` folder. Do not make the user navigate there. This applies to every page (assessment, workbench, weekly reflection).
+
+* **If you can write files in the workspace:** offer the shortcut first. The user tells you their choices in chat (for example *"B and C, style B, keep all rules, strike the red-team one"*), and you write the Markdown file straight into `ictv-coach/`, keeping the headings of the matching template in `resources/`. Read the result back to the user in two lines so they can confirm it.
+* **If the user clicked Save on the page:** look in `ictv-coach/` first. If the file is not there, ask where they saved it (most likely Documents or Downloads), then move it into place with their OK. Never search outside the workspace without asking.
+* **If you cannot write files (chat only):** tell the user to pick their `ictv-coach/` folder in the dialog once. The browser reopens there the next time.
+
 ---
 
 ## Workflow 1: Assess & Onboard (`assess`)
@@ -90,10 +104,14 @@ When the user brings a new idea to explore or a task they want to delegate:
    * If it is a **new exploration or repeatable workflow**, build an **Interactive Delegation Option Workbench** (`ictv-coach/handovers/<task-slug>-workbench.html`) using [option-workbench-ui-template.html](resources/option-workbench-ui-template.html):
      * **Step 1 (Multi-Selectable Options with Progressive Disclosure):** Propose 3 distinct ways to approach the task (e.g., *Option A: Red-Team Challenger*, *Option B: Source-Locked Builder*, *Option C: Standing Weekly Scanner*). Include honest **Pros**, **Cons**, and **Where It Breaks** for each. Allow the user to **select one OR combine multiple options (such as B + C)**.
      * **Step 2 (A vs. B Taste Calibrator):** Provide two short contrasting micro-samples of how the output could read so the user can react to concrete examples instead of describing abstract tone rules.
-     * **Step 3 (Pre-Populated ICTV Building Blocks):** Pre-draft 5–7 domain-smart rules across `I`, `C`, `T` (including a Handbrake), and `V` (including Stowaway defense) tagged to the options they come from. The user clicks to cycle `[KEEP]`, `[OPTIONAL]`, or `[STRIKE]` and can add their own rule.
+     * **Step 3 (Pre-Populated ICTV Building Blocks):** Pre-draft 5–7 domain-smart rules across `I`, `C`, `T` (including a Handbrake), and `V` (including Stowaway defense) tagged to the options they come from. The user clicks to cycle `[KEEP]`, `[OPTIONAL]`, or `[STRIKE]` and can add their own rule under any letter.
+     * **Step 4 (Check, Sign, Save):** The page checks the handover before the user saves it (job and "done" written down, a "not acceptable" boundary, an input source, a handbrake, 3+ checks, a named owner). Anything still open is written into the saved file under **Open Gaps**.
+     * Also pre-draft the payload's `objective`, `doneLooksLike`, and `trustPlan` (how the first 3 runs are read, and when trust is withdrawn) so the user edits a proposal instead of facing empty fields.
 2. **Save Choices to `ictv-coach/handovers/<task-slug>-handover.md`:**
    * The user clicks **Save `<task-slug>-handover.md`** in the workbench (or tells you which options/rules they toggled), and you write/read the saved `ictv-coach/handovers/<task-slug>-handover.md` file (formatted like [handover-template.md](resources/handover-template.md)) in the next step.
-3. **Execute with Check Report First:** When running the task from the saved handover file, always output the **Check Report** (including `[Assumption]` tags and a `"Not checked:"` line) *before* presenting the draft.
+   * Follow **Getting a Saved File into the Folder** below so the user never has to hunt for the right folder in a save dialog.
+3. **Close Open Gaps First:** If the saved handover has an **Open Gaps** section, resolve each gap with the user before the first run.
+4. **Execute with Check Report First:** When running the task from the saved handover file, always output the **Check Report** (including `[Assumption]` tags and a `"Not checked:"` line) *before* presenting the draft.
 
 ---
 
@@ -107,7 +125,9 @@ When an AI output has an error, wrong tone, hallucinated source, or poor structu
    * **`[I]` Instruction miss:** The goal, constraint, or "not acceptable" rule was unstated or ambiguous.
    * **`[C]` Context miss:** The agent had to guess background knowledge, terminology, or examples that weren't in the folder.
    * **`[T]` Tool miss:** The agent guessed something it should have fetched/computed deterministically, or had the wrong access boundary.
-3. **Upgrade the System First:** Edit the relevant file in `ictv-coach/handovers/` or project context *first*, append a 3-line entry to `ictv-coach/misses-ledger.md`, and then re-generate the output using the upgraded setup.
+3. **Upgrade the System First:** Edit the relevant file in `ictv-coach/handovers/` or project context *first*. Change one thing at a time and keep earlier checks in place.
+4. **Every Miss Ends with a Check:** Whatever the root cause, also add or tighten one check in the task's handover so the same flaw is caught before the user reads the next result. A miss fixed only in `I`, `C`, or `T` can return unnoticed. **Tighten before you add:** if an existing check should have caught the miss, sharpen that one instead of writing a new one.
+5. **Log and Re-Run:** Append a short entry to `ictv-coach/misses-ledger.md` (what went wrong, why it slipped through, what changed, the new check), then re-generate the output using the upgraded setup.
 
 ---
 
@@ -120,8 +140,10 @@ Follow [weekly-checkin-guide.md](references/weekly-checkin-guide.md) to run a 10
    * Did we try this week's committed practice?
    * Which letter (`I`, `C`, `T`, `V`) accounted for most friction or rewrites this week?
    * **Trust Calibration Check:** Are you reading fewer raw drafts from top to bottom because your Check Reports are catching issues first? Or is *criteria drift* (skimming without checks) creeping in?
-3. **Choose Next Week's Single Step:** Agree on one small adjustment for the coming week and update `ictv-coach/active-focus.md`.
-4. **Save the Check-in & Generate Interactive HTML Reflection:**
+3. **Prune:** Keep checks and suggestions few enough to stay alive. Merge or drop checks that no longer earn their place, and retire any practice the user has skipped twice. Follow the pruning rules in [weekly-checkin-guide.md](references/weekly-checkin-guide.md).
+4. **Choose Next Week's Single Step:** Agree on one small adjustment for the coming week and update `ictv-coach/active-focus.md`. Offer at most three candidates. If last week's practice was skipped, offer the same goal through a different way of learning rather than repeating the suggestion.
+5. **Save the Check-in & Generate Interactive HTML Reflection:**
    * Write the Markdown summary to `ictv-coach/check-ins/YYYY-WXX.md`.
    * Generate the interactive HTML reflection at `ictv-coach/check-ins/YYYY-WXX.html` using [weekly-reflection-ui-template.html](resources/weekly-reflection-ui-template.html), populated with the week's real misses, trust calibration options, and next week's candidate experiments (and render it in the UI when supported).
-5. **Schedule Next Check-in:** If no recurring schedule exists yet, offer to schedule a weekly check-in (using `/schedule` or the platform's scheduled automation tool).
+   * The page saves both `YYYY-WXX.md` and next week's `active-focus.md`. If the saved check-in has a **To Append to `misses-ledger.md`** section, copy those entries into the ledger.
+6. **Schedule Next Check-in:** If no recurring schedule exists yet, offer to schedule a weekly check-in (using `/schedule` or the platform's scheduled automation tool).
