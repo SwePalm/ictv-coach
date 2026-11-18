@@ -45,7 +45,7 @@ If a human just gave you this repository link and asked *"Help me use this"*, *"
 * **I — Instructions:** How the work to be done is specified (objective, what "done" looks like, and what is explicitly *not acceptable*).
 * **C — Context:** What the job needs to know, where inputs live, and how the result should arrive.
 * **T — Tools:** Separating safe *context plumbing* (reading files/sources) from *action tools* (staged writes), plus a clear *handbrake* (when to stop and ask).
-* **V — Verification:** Writing down what "good" looks like and reading a **Check Report** *before* you read the draft.
+* **V — Verification:** Writing down what "good" looks like and reading a **Check Report** *before* you read the draft. One check tries the result the way its reader would, failed checks say how much they matter (*blocks signing*, *fix if time*, *cosmetic*), and the AI may never soften a check to pass it: after 3 failed tries it stops and asks you.
 
 ---
 
@@ -65,7 +65,7 @@ Check Report BEFORE                     Why did it      Upgrade rule,
 reading the draft                       fall short?     context, or tool
 ```
 
-Whenever an AI output disappoints you, you don't just open the document and rewrite the text by hand (which teaches your setup nothing). You take 30 seconds with your coach to **tag the miss** to **`[I]`**, **`[C]`**, **`[T]`**, or **`[V]`** and update your folder—so the same failure never happens twice.
+Whenever an AI output disappoints you, you don't just open the document and rewrite the text by hand (which teaches your setup nothing). You take 30 seconds with your coach to **tag the miss** to **`[I]`**, **`[C]`**, **`[T]`**, or **`[V]`** and update your folder—so the same failure never happens twice. Every miss ends with a check written as *"When X, check Y"*, so it only runs when it applies and the list stays short.
 
 ---
 
@@ -77,7 +77,7 @@ You don't need to study a multi-level adoption table. **ICTV Coach** meets you a
 | :--- | :--- | :--- |
 | *"I spend 2 minutes prompting and 45 minutes rewriting the draft myself."* | **`[V]` Verification & `[I]` Instructions** | Define 3 tickable checks + a mandatory `"Not checked:"` line, and read the **Check Report before the draft**. |
 | *"I keep pasting the same background into every chat, or it forgets how we work."* | **`[C]` Context** | Apply the **3x Paste Rule**: move recurring context out of chat history into plain Markdown files in a folder you own. |
-| *"I get inconsistent results on work I do every week."* | **`[I]` Instructions & `[V]` Verification** | Run a 5-minute **Handover Interview** to turn a repeating task into a reusable `handover.md` with clear negative constraints. |
+| *"I get inconsistent results on work I do every week."* | **`[I]` Instructions & `[V]` Verification** | Run a 5-minute **Handover Interview** to turn a repeating task into a reusable `handover.md` with clear negative constraints, and compare the first run **side by side** with the last version you made by hand. |
 | *"I don't dare connect AI to real systems—what if it changes or sends something?"* | **`[T]` Tools** | Split **Context Plumbing** (read-only) from **Staged Actions** (draft writes), demonstrate reversibility, and set one explicit **Handbrake**. |
 | *"I run multiple agents, and reviewing their output has made ME the bottleneck."* | **Advanced `[V]` & `[C]`** | Separate the generator from an independent verifier, run **mutation checks** on your rubric, prune context bloat, and offload deterministic checks to scripts. |
 
@@ -133,7 +133,7 @@ The pages share one look and one set of helpers, kept in [`tools/shared/`](tools
 | [`skills/ictv-coach/SKILL.md`](skills/ictv-coach/SKILL.md) | Main Agent Skill specification and workflow router (`assess`, `unblock`, `loop`, `checkin`). |
 | [`skills/ictv-coach/references/blocker-diagnostic-guide.md`](skills/ictv-coach/references/blocker-diagnostic-guide.md) | Maps human blockers across Tier 1 (Chat), Tier 2 (Repeatable Files), and Tier 3 (Advanced Agentic) to concrete ICTV practices. |
 | [`skills/ictv-coach/references/history-and-memory-audit.md`](skills/ictv-coach/references/history-and-memory-audit.md) | Playbook for auditing session transcripts, built-in chat memory, and workspace files before advising. |
-| [`skills/ictv-coach/references/verification-and-trust-playbook.md`](skills/ictv-coach/references/verification-and-trust-playbook.md) | Check Report Before Result, the mandatory `"Not checked"` boundary, defending against *The Stowaway*, and the Miss Tagging Loop. |
+| [`skills/ictv-coach/references/verification-and-trust-playbook.md`](skills/ictv-coach/references/verification-and-trust-playbook.md) | Check Report Before Result, the mandatory `"Not checked"` boundary, trying the result as its reader would, defending against *The Stowaway*, and the Miss Tagging Loop. |
 | [`skills/ictv-coach/references/weekly-checkin-guide.md`](skills/ictv-coach/references/weekly-checkin-guide.md) | Protocol for the 10-minute weekly retrospective and recurring schedule setup. |
 | [`skills/ictv-coach/resources/`](skills/ictv-coach/resources/) | Markdown templates + interactive HTML templates (`assessment-ui-template.html`, `option-workbench-ui-template.html`, `weekly-reflection-ui-template.html`). |
 | [`tools/check.mjs`](tools/check.mjs) | The repo's own Check Report, plus `tools/shared/` (the look and helpers every page shares). |

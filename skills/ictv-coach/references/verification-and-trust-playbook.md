@@ -29,7 +29,8 @@ Whenever coaching a user on a deliverable, structure the output so the **Check R
 - [x] **V1 (Source grounding):** All 3 claims reference passages in `q3-notes.md`.
 - [x] **V2 (Audience & tone):** Written for business owners; zero unexplained technical acronyms.
 - [x] **V3 (Length & format):** 250 words (limit: 300), structured as 3 decision bullets.
-- [ ] **V4 (Competitor pricing comparison):** FAILED — pricing table was not in the folder.
+- [x] **V4 (Try it as the reader):** Read it as a business owner with five minutes; each bullet ends in a decision they can make.
+- [ ] **V5 (Competitor pricing comparison):** FAILED, **Blocks signing** — pricing table was not in the folder.
 
 **Bracketed Assumptions:**
 - `[Assumption: Treated Q3 figures as final rather than preliminary.]`
@@ -40,6 +41,14 @@ Whenever coaching a user on a deliverable, structure the output so the **Check R
 
 ### Why the `"Not Checked"` Line Is Mandatory
 An AI that claims 100% pass rates makes humans lazy. Requiring the AI to state **what it could not verify** turns the human's review from *"read everything hoping to spot a bug"* into *"inspect the exact seam where the agent stopped."*
+
+### Three More Rules for the Check Report
+* **Try it as the reader.** Most checks look at the text. Include at least one that uses the result the way its reader would: follow the steps, open the file, check one number by hand. A draft can pass every text check and still not work for the person who receives it.
+* **Say how much each failure matters.** Mark every failed check as **Blocks signing**, **Fix if time** or **Cosmetic**, and say when a flaw was already in the source, so the owner knows where to look first and nobody is blamed for an old mistake.
+* **The checks belong to the owner.** The AI may never soften, skip or remove a check to get a pass. If a check still fails after 3 attempts, it stops and says which check failed and why. A failing check is how the AI decides it needs a person.
+
+### Side by Side for the First Runs
+When a task used to be done by hand, the old way is the best answer key. Compare the first run with the last version a person made, for example last month's report. Every difference is either a mistake or a change the owner approves. Keep a short note of the approved changes so they are not raised again.
 
 ---
 
@@ -69,3 +78,5 @@ Instead, walk the user through a 60-second **Miss Tagging Loop**:
 
 ### Golden Rule of Loop Tuning
 **Change one thing at a time, and keep earlier checks in place.** And **every miss ends with a check**: even when the root cause was `[I]`, `[C]`, or `[T]`, add or tighten one check so the same flaw is caught before a human reads the next result. That way, your verification list grows from real failures you actually experienced—not a speculative 50-item checklist invented in advance.
+
+**Write each new check as "When X, check Y"** (for example, *"When the draft mentions prices, compare them to the price list"*). The AI then runs only the checks that apply to the task at hand, so the list can grow from real misses without every check running every time.

@@ -393,7 +393,7 @@ const ICTV = (() => {
     // The coach's own check on the handover, shown before the person saves it.
     function handoverChecks() {
       const text = b => `${b.category} ${b.text}`;
-      const checkCount = liveBlocks('V').length + 2; // plus the style check and the assumptions check
+      const checkCount = liveBlocks('V').length + 3; // plus the style, try-it and assumptions checks
       return [
         { ok: !!state.objective.trim() && !!state.done.trim(), label: 'The job and what done looks like are written down.', gap: 'Objective or "done looks like" is empty.' },
         { ok: liveBlocks('I').some(b => /not acceptable|do not|don't|never/i.test(text(b))), label: 'At least one "not acceptable" boundary is kept.', gap: 'No "not acceptable" boundary is kept.' },
@@ -412,6 +412,7 @@ const ICTV = (() => {
       const checks = [
         { name: 'Style and framing', text: sample.derivedRuleV },
         ...liveBlocks('V').map(b => ({ name: b.category + (b.state === 'optional' ? ', optional' : ''), text: b.text })),
+        { name: 'Try it as the reader', text: 'Use the result the way its reader would (follow the steps, open the file, or check one number by hand) and report what you tried and whether it worked.' },
         { name: 'Assumptions and unknowns', text: 'Every assumption is marked as `[Assumption: ...]`, and a `Not checked:` line lists what could not be verified.' }
       ];
       const gaps = handoverChecks().filter(c => !c.ok);
@@ -440,12 +441,15 @@ ${rules('C')}
 ${rules('T')}
 
 ## V — Verification (Check Report Before Result)
-Before presenting or saving the result, run these checks and print the **Check Report** at the top of the response:
+Before presenting or saving the result, run these checks and print the **Check Report** at the top of the response. Mark each failed check as **Blocks signing**, **Fix if time** or **Cosmetic**, and say when a flaw was already in the source.
+
+- **The checks are mine:** Never soften, skip or remove a check to get a pass. If a check still fails after 3 attempts, stop and tell me which check failed and why.
 
 ${checks.map((c, i) => `- [ ] **V${i + 1} (${oneLine(c.name)}):** ${oneLine(c.text)}`).join('\n')}
 
 ## Trust & Review Plan
 - **First 3 Runs:** ${oneLine(trust.firstRuns) || 'Read the Check Report first, then spot-check everything listed under Assumptions and Not checked.'}
+- **Side by Side:** If this task used to be done by hand, compare the first run with the last version a person made. Every difference is either a mistake or a change I approve.
 - **Withdraw Trust and Reopen This Handover When:** ${oneLine(trust.withdrawWhen) || 'A check is reported as passed but fails on a human spot-check. Log the miss in ictv-coach/misses-ledger.md.'}
 ${gaps.length ? `\n## Open Gaps (Close These Before Relying on the Result)\n${gaps.map(g => `- ${g.gap}`).join('\n')}\n` : ''}`;
     }

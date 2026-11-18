@@ -16,4 +16,4 @@ Every time an AI output disappoints, resist the urge to just manually edit the t
 - **What went wrong:** [e.g., Draft used generic consulting buzzwords and assumed the wrong target buyer.]
 - **Why it slipped through:** [e.g., Target buyer profile wasn't in the folder (`[C]`), and there was no check banning buzzwords (`[V]`).]
 - **System upgrade applied:** [e.g., Added buyer profile to `profile.md`.]
-- **New check so it is caught next time:** [e.g., Added Check V3 ("Zero banned buzzwords") and Check V4 ("Names the buyer from `profile.md`") to the task handover.]
+- **New check so it is caught next time (written as "When X, check Y"):** [e.g., Added "When the draft describes the buyer, check it names the buyer from `profile.md`" to the task handover, and tightened V3 to "Zero banned buzzwords".]
