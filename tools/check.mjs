@@ -214,6 +214,19 @@ check('The workbench flags a handover with no handbrake, and writes the gap into
   return problems;
 });
 
+check('Every handover keeps the verification rules even when every check the person drafted is struck', () => {
+  const page = PAGES.find(p => p.payloadId === 'ictv-workbench-data');
+  const bare = loadPage(page, payload => { payload.buildingBlocks = payload.buildingBlocks.filter(b => b.letter !== 'V'); }).page;
+  const saved = bare.buildHandoverMarkdown();
+  const rules = {
+    'a try-it-as-the-reader check': /Try it as the reader/,
+    'labels for how much a failure matters': /Blocks signing.*Fix if time.*Cosmetic/,
+    'the rule that the checks belong to the owner, with a stop after 3 attempts': /checks are mine.*3 attempts/,
+    'the side-by-side comparison for the first runs': /Side by Side/
+  };
+  return Object.entries(rules).filter(([, re]) => !re.test(saved)).map(([name]) => `the saved handover lost ${name}`);
+});
+
 check('Pages offer at most three choices where the person must pick one (the rule of three)', () => {
   const problems = [];
   const lists = { 'ictv-assessment-data': 'experimentOptions', 'ictv-workbench-data': 'options', 'ictv-weekly-data': 'nextWeekCandidates' };

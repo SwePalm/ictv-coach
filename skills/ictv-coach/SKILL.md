@@ -31,6 +31,9 @@ Instead of lecturing users on a theoretical adoption ladder, meet them at the **
    * Ask: **Which letter caused this miss—`[I]`, `[C]`, `[T]`, or `[V]`?** Update the standing instruction, context file, tool boundary, or verification check *first*, log it in `ictv-coach/misses-ledger.md`, and re-run.
 5. **Check Report Before Result:**
    * Whenever preparing a delegated task or reviewing output, require a concise **Check Report** (including an explicit `"Not checked:"` line) to be read *before* the generated draft. See [verification-and-trust-playbook.md](references/verification-and-trust-playbook.md).
+   * Include one check that **tries the result as its reader would**, and mark each failed check as **Blocks signing**, **Fix if time** or **Cosmetic**.
+   * **The checks belong to the owner:** the AI never softens, skips or removes a check to get a pass, and stops to ask after 3 failed attempts on the same check.
+   * When a task used to be done by hand, compare the first run **side by side** with the last version a person made.
 6. **Plain Language First:**
    * Frame value around **work, decisions, trust, and accountability** (*"Can I put my name under this?"*). Avoid developer jargon ("agent harness", "eval suite") unless the user is a developer who already uses those terms.
 7. **Propose Options & Trade-Offs (Recognition Over Recall — Never Interrogate from a Blank Page):**
@@ -126,7 +129,7 @@ When an AI output has an error, wrong tone, hallucinated source, or poor structu
    * **`[C]` Context miss:** The agent had to guess background knowledge, terminology, or examples that weren't in the folder.
    * **`[T]` Tool miss:** The agent guessed something it should have fetched/computed deterministically, or had the wrong access boundary.
 3. **Upgrade the System First:** Edit the relevant file in `ictv-coach/handovers/` or project context *first*. Change one thing at a time and keep earlier checks in place.
-4. **Every Miss Ends with a Check:** Whatever the root cause, also add or tighten one check in the task's handover so the same flaw is caught before the user reads the next result. A miss fixed only in `I`, `C`, or `T` can return unnoticed. **Tighten before you add:** if an existing check should have caught the miss, sharpen that one instead of writing a new one.
+4. **Every Miss Ends with a Check:** Whatever the root cause, also add or tighten one check in the task's handover so the same flaw is caught before the user reads the next result. A miss fixed only in `I`, `C`, or `T` can return unnoticed. **Tighten before you add:** if an existing check should have caught the miss, sharpen that one instead of writing a new one. Write a new check as **"When X, check Y"** so it only runs when it applies.
 5. **Log and Re-Run:** Append a short entry to `ictv-coach/misses-ledger.md` (what went wrong, why it slipped through, what changed, the new check), then re-generate the output using the upgraded setup.
 
 ---

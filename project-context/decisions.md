@@ -61,3 +61,35 @@
 * **Status:** Accepted (2026-11-11)
 * **Decision:** The coach offers at most three candidate next steps. A practice left untested at two check-ins in a row is not offered a third time. It is retired without blame, and the same goal is offered through a different way of learning (do it, watch it, compare it, spot it, have it done). The way that works is recorded in `profile.md`. Stale blockers are removed, not carried forward.
 * **Rationale:** People learn in different ways, as in golf practice: if one method does not work, try another. A coach that repeats an unused suggestion forever becomes noise, and stale advice erodes trust in the rest.
+
+## D11 — One Check Tries the Result as Its Reader Would
+* **Subject:** `try-it-as-the-reader`
+* **Status:** Proposed (2026-11-18)
+* **Decision:** Every handover has a check that uses the result the way its reader would (follow the steps, open the file, check one number by hand) and reports what was tried. The workbench adds it to every saved handover.
+* **Rationale:** All other checks look at the text. A draft can pass every text check and still not work for the person who receives it. Taken from how the Claude Code team verifies: running the change matters more than tests.
+
+## D12 — The Checks Belong to the Owner; Three Failed Attempts Means Stop
+* **Subject:** `checks-belong-to-owner`
+* **Status:** Proposed (2026-11-18)
+* **Decision:** The AI never softens, skips or removes a check to get a pass. If the same check still fails after 3 attempts, it stops and says which check failed and why. This is also a handbrake condition in the handover template.
+* **Rationale:** A check the work can change is no check. The old handbrake only covered problems before the work starts, not getting stuck halfway. A failing check is how the AI decides it needs a person.
+
+## D13 — New Checks Are Written as "When X, Check Y"
+* **Subject:** `triggered-checks`
+* **Status:** Proposed (2026-11-18)
+* **Decision:** A check added after a miss names the situation it applies to, for example "When the draft mentions prices, compare them to the price list". The AI runs only the checks that apply.
+* **Rationale:** Works with D9's pruning: the list can grow from real misses without every check running every time, and nobody has to remember why a check exists.
+
+## D14 — Side by Side with the Old Way for the First Runs
+* **Subject:** `side-by-side-first-runs`
+* **Status:** Proposed (2026-11-18)
+* **Decision:** When a task used to be done by hand, the trust plan compares the first run with the last version a person made. Every difference is a mistake or a change the owner approves, and approved changes are noted so they are not raised again.
+* **Rationale:** The old way is the best answer key there is, and it is more concrete than "spot-check the first 3 runs".
+
+## D15 — Failed Checks Say How Much They Matter
+* **Subject:** `failure-weight`
+* **Status:** Proposed (2026-11-18)
+* **Decision:** The Check Report marks each failed check as **Blocks signing**, **Fix if time** or **Cosmetic**, and says when a flaw was already in the source.
+* **Rationale:** Tells the owner where to look first, and keeps old mistakes in the source from being blamed on the new work.
+
+**Left out on purpose (2026-11-18):** test libraries, end-to-end tooling, gates that block unchecked work, stamping how each piece was checked, formal test sets, scoring each step separately, several checkers voting, and the "a miss must happen twice before it becomes a rule" threshold. They solve problems of hundreds of agents running at once; at one person's scale D9 and pruning already cover them.
